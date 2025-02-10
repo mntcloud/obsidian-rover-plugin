@@ -1,0 +1,145 @@
+.rover-container {
+    margin-top: 20px;
+}
+
+.rover-bookmark-item, .rover-bookmark-folder {
+    display: flex;
+    align-items: center;
+}
+
+.rover-bookmark-item > .rover-emojicon {
+    margin-right: 5px;
+}
+
+.rover-file-manager {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    flex: 0 auto;
+    margin-bottom: unset;
+}
+
+.rover-bookmarks-container {
+    display: flex;
+    flex-direction: column;
+
+    max-height: 300px;
+}
+
+.rover-bookmarks-container .highlight-space {
+    height: 6px;
+    border-radius: 10px;
+}
+
+.rover-bookmarks-container .highlight-space.active {
+    background-color: var(--color-base-30);
+}
+
+
+
+.rover-bookmarks-container > .drop-small-field {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 10px;
+    height: 65px;
+    border-radius: 10px;
+    border: var(--border-width) solid var(--color-base-30);
+}
+
+.rover-bookmarks-container > .drop-large-field {
+    color: var(--text-faint);
+}
+
+.rover-bookmarks-container:has(.drop-large-field) {
+    height: 75px;
+    justify-content: center;
+}
+
+.rover-bookmark-folder > .lucide-chevron-right {
+    margin-right: 2.5px;
+}
+
+.rover-emojicon {
+    opacity: 0.5;
+    font-size: 16px;
+}
+
+.rover-file-manager .rover-folder-container, .rover-file-manager .rover-file {
+    padding: 5px 0;
+}
+
+.rover-folder-container > .rover-folder.expanded {
+    padding-bottom: 5px;
+}
+
+.rover-folder-container.hovered {
+    background-color: var(--color-base-20);
+}
+
+.rover-folder-container:has(.rover-folder.expanded) {
+    padding-bottom: unset;
+} 
+
+.rover-file > input, .rover-folder > input {
+    font-family: var(--font-interface-theme);
+    width: fit-content;
+
+    background: unset;
+    outline: 0px;
+    border: 0px;
+
+    color: var(--text-normal);
+}
+
+.rover-recents > .rover-file, .rover-recents-others > div {
+    color: var(--nav-item-color);
+    padding: 6px 12px;
+}
+
+.rover-recents {
+    width: 200px;
+}
+
+.rover-recents-others {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 160px;
+}
+
+.rover-recents-others > .rover-file {
+    width: 200px;
+
+}
+
+.rover-recents > div.active {
+    color: var(--nav-item-color-selected);
+    background-color: var(--nav-item-background-active);
+    border-radius: var(--radius-l);
+}
+
+.rover {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    padding: var(--size-4-1) var(--size-4-3) 0px var(--size-4-3);
+    font-size: var(--nav-item-size);
+    font-weight: var(--nav-item-weight);
+}
+
+.rover-folder {
+    display: flex;
+    align-items: center;
+    color: var(--nav-folder-color);
+}
+
+.rover-folder > .lucide-folder {
+    margin-right: 5px;
+}
+
+.rover-lucide {
+    height: var(--icon-size);
+    width: var(--icon-width);
+    stroke-width: var(--icon-stroke);
+    color: var(--nav-folder-collapse-color);
+}
