@@ -1,10 +1,9 @@
 import m from "mithril";
 import { File } from "./File";
 import { RoverFile } from "view/models/data/Base";
-import { FileManagerModel } from "view/models/FileManagerModel";
+import { FileModel } from "view/models/FileManagerModel";
 import { Obsidian } from "view/models/data/Obsidian";
 import { Menu } from "obsidian";
-import { Recents } from "view/models/RecentsModel";
 
 interface Attr {
     name: string,
@@ -21,6 +20,8 @@ export class Folder implements m.ClassComponent<Attr> {
     renameFieldText?: string
     isEdited: boolean
 
+    path: string
+
     handleInputChange(ev: Event) {
         const target = ev.target as HTMLInputElement
 
@@ -31,18 +32,14 @@ export class Folder implements m.ClassComponent<Attr> {
         if (ev.code == "Enter") {
             const file = Obsidian!.vault.getFolderByPath(path)!
 
-            Recents.oldFolderPath = file.path
             if (file.parent && !file.parent.isRoot()) {
-                Recents.pendingNewFolderPath = `${file.parent.path}/${this.renameFieldText}`
-
                 await Obsidian!.vault.rename(file, `${file.parent.path}/${this.renameFieldText}`)
             } else {
-                Recents.pendingNewFolderPath = `${this.renameFieldText}`
-
                 await Obsidian!.vault.rename(file, `${this.renameFieldText}`)
             }
 
             this.isEdited = false
+            this.renameFieldText = undefined
         }
 
         if (ev.code == "Escape") {
@@ -51,17 +48,19 @@ export class Folder implements m.ClassComponent<Attr> {
         }
     }
 
-
     oninit(vnode: m.Vnode<Attr, this>) {
         this.nested = []
         this.isDragEntered = false
         this.isEdited = false
+        this.path = vnode.attrs.path
     }
 
-    async handleStructureUpdate(path: string) {
+    async onCreateDelete(path: string) {
         if (this.nested.length) {
-            this.nested = await FileManagerModel.getFiles(path)
+            this.nested = await FileModel.getFiles(path)
         }
+
+        console.log(`FOLDER ${path} ${performance.now()}: nested create delete and redraw`)
         m.redraw()
     }
 
@@ -83,7 +82,7 @@ export class Folder implements m.ClassComponent<Attr> {
             const input = vnode.dom.querySelector("input")!
 
             input?.focus()
-        }
+        } 
     }
 
     async handleDrop(ev: DragEvent, targetPath: string) {
@@ -96,8 +95,7 @@ export class Folder implements m.ClassComponent<Attr> {
         const file = Obsidian!.vault.getFileByPath(path)!
 
         if (file.parent && file.parent.path != targetPath) {
-            await Obsidian?.vault.copy(file, `${targetPath}/${file.name}`)
-            await Obsidian!.vault.delete(file)
+            await Obsidian!.vault.rename(file, `${targetPath}/${file.name}`)
         } else {
             console.log("SAME!")
         }
@@ -155,7 +153,7 @@ export class Folder implements m.ClassComponent<Attr> {
         if (this.nested.length) {
             this.nested = []
         } else {
-            const files = await FileManagerModel.getFiles(path)
+            const files = await FileModel.getFiles(path)
 
             if (files) {
                 this.nested = files
@@ -168,12 +166,12 @@ export class Folder implements m.ClassComponent<Attr> {
     view(vnode: m.Vnode<Attr, this>) {
         return (
             <div className={`rover-folder-container ${this.isDragEntered ? "hovered" : ""}`}
-                onstructureupdate={() => this.handleStructureUpdate(vnode.attrs.path)}
+                oncreatedelete={async () => await this.onCreateDelete(vnode.attrs.path)}
                 ondrop={async (ev: DragEvent) => await this.handleDrop(ev, vnode.attrs.path)}
                 ondragenter={(ev: DragEvent) => this.handleDragEnterExit(vnode.attrs)}
                 ondragleave={(ev: DragEvent) => this.handleDragEnterExit(vnode.attrs)}
                 ondragover={(ev: DragEvent) => ev.preventDefault()}
-                data-path={vnode.attrs.path}>
+                data-path={this.nested.length ? vnode.attrs.path : undefined}>
                 <div className={`rover-folder ${this.nested.length ? "expanded" : ""}`}
                     oncontextmenu={(ev: PointerEvent) => this.handleContextMenu(ev, vnode.attrs.path)}
                     onclick={!this.isEdited ? async () => await this.reveal(vnode.attrs.path) : undefined}

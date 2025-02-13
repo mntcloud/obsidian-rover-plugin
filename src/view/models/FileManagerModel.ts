@@ -4,11 +4,24 @@ import { Obsidian } from "./data/Obsidian";
 import { Recents } from "./RecentsModel";
 
 export interface FileManagerBaseModel {
-    getFiles: (path: string) => Promise<RoverFile[]>
+    countSegments: (path: string) => number,
+    getFiles: (path: string) => Promise<RoverFile[]>,
     openFile: (path: string, openNewTab?: boolean) => Promise<void>
 }
 
-export const FileManagerModel: FileManagerBaseModel = {
+export const FileModel: FileManagerBaseModel = { 
+    countSegments(path) {
+        let count = 0
+        
+        for (const char of path) {
+            if (char == "/") {
+                count++
+            }
+        }
+
+        return count
+    },
+    
     async openFile(path, openNewTab = false) {
         if (!Obsidian) {
             console.error("ROVER: workspace is not initialized");

@@ -3,7 +3,7 @@ import m from "mithril";
 import { Menu } from "obsidian";
 import { Bookmarks } from "view/models/BookmarksModel";
 import { Obsidian } from "view/models/data/Obsidian";
-import { FileManagerModel } from "view/models/FileManagerModel";
+import { FileModel } from "view/models/FileManagerModel";
 
 interface Attr {
     name: string,
@@ -105,7 +105,7 @@ export class File implements m.ClassComponent<Attr> {
                 ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs.path)}
                 ondragend={(ev: DragEvent) => this.onDragEnd(ev)}
                 oncontextmenu={(ev: PointerEvent) => this.handleContextMenu(ev, vnode.attrs.path)}
-                onclick={!this.isEdited ? () => FileManagerModel.openFile(vnode.attrs.path).then(() => m.redraw()) : undefined}>
+                onclick={!this.isEdited ? () => FileModel.openFile(vnode.attrs.path).then(() => m.redraw()) : undefined}>
                 {!this.isEdited ? 
                     <span>{!this.renameFieldText ? vnode.attrs.name : this.renameFieldText}</span> : 
                     <input value={this.renameFieldText} 
