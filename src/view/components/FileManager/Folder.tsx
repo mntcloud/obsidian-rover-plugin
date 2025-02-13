@@ -20,8 +20,6 @@ export class Folder implements m.ClassComponent<Attr> {
     renameFieldText?: string
     isEdited: boolean
 
-    path: string
-
     handleInputChange(ev: Event) {
         const target = ev.target as HTMLInputElement
 
@@ -52,7 +50,6 @@ export class Folder implements m.ClassComponent<Attr> {
         this.nested = []
         this.isDragEntered = false
         this.isEdited = false
-        this.path = vnode.attrs.path
     }
 
     async onCreateDelete(path: string) {
@@ -138,7 +135,7 @@ export class Folder implements m.ClassComponent<Attr> {
                 .setIcon("trash")
                 .setSection("danger")
                 .onClick(async () => {
-                    await Obsidian!.vault.delete(folder)
+                    await Obsidian!.vault.trash(folder, false)
                 })
         )
 
