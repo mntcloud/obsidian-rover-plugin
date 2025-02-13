@@ -53,6 +53,7 @@ export const Bookmarks: BookmarksModel = {
 
             Bookmarks.saveBookmarks()
             Bookmarks.dragged = []
+            Bookmarks.draggedFlat = undefined
 
             m.redraw()
         }).open();
