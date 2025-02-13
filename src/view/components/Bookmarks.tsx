@@ -44,6 +44,7 @@ export class BookmarksView implements m.ClassComponent<Attr> {
                 }).open()
 
                 break;
+
             }
         }
     }
@@ -55,7 +56,7 @@ export class BookmarksView implements m.ClassComponent<Attr> {
                 ondragover={!vnode.attrs.bookmarks.length ? (ev: DragEvent) => ev.preventDefault() : undefined}>
 
                 {vnode.attrs.bookmarks.length 
-                    ? <ListBookmarks inheritedIndex={0} items={vnode.attrs.bookmarks} nest={-1} /> 
+                    ? <ListBookmarks inheritedIndex={-1} items={vnode.attrs.bookmarks} nest={-1} /> 
                     : <span className="drop-large-field">Drop a file here to create a bookmark</span>}
 
                 {vnode.attrs.bookmarks.length && Bookmarks.isFileDragStarted ?

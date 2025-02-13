@@ -19,7 +19,7 @@ export class ListBookmarks implements m.ClassComponent<Attr> {
             const item = items[index]
 
             if (item.children) {
-                flattened = this.count(item.children, flattened)
+                flattened = this.count(item.children, flattened + 1)
             } else {
                 flattened++
             }
@@ -38,7 +38,7 @@ export class ListBookmarks implements m.ClassComponent<Attr> {
                 if (bookmark.children) {
                     const flattenedIndex = flattened + 1
 
-                    flattened = this.count(bookmark.children, flattened + 1) + 1
+                    flattened = this.count(bookmark.children, flattenedIndex)
 
                     return (
                         <BookmarkFolder
@@ -48,13 +48,12 @@ export class ListBookmarks implements m.ClassComponent<Attr> {
                             bookmarks={bookmark.children} nest={vnode.attrs.nest + 1} />
                     )
                 } else {
-                    const flattenedIndex = flattened
                     flattened++
 
                     return (
                         <BookmarkItem
                             path={bookmark.path}
-                            flattenedIndex={flattenedIndex}
+                            flattenedIndex={flattened}
                             index={index} key={bookmark.crd} nest={vnode.attrs.nest + 1}
                             name={bookmark.name} emojicon={bookmark.emojicon} />
                     )

@@ -3,7 +3,7 @@ import * as utils from "utils";
 import { HighlightSpace } from "./HighlightSpace";
 
 import { Bookmarks } from "view/models/BookmarksModel";
-import { FileManagerModel } from "view/models/FileManagerModel";
+import { FileModel } from "view/models/FileManagerModel";
 
 interface Attr {
     flattenedIndex: number,
@@ -27,13 +27,13 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
         this.isDragEntered = !this.isDragEntered
     }
 
-    onDragStart(ev: DragEvent, attr: Attr) {
+    onDragStart(ev: DragEvent, index: number, flattened: number) {
         Bookmarks.dragged = []
 
-        ev.dataTransfer!.setData("application/rover.bookmark", attr.index.toString()) 
+        ev.dataTransfer!.setData("application/rover.bookmark", index.toString()) 
 
-        Bookmarks.dragged.push(attr.index)
-        Bookmarks.draggedFlat = attr.flattenedIndex
+        Bookmarks.dragged.push(index)
+        Bookmarks.draggedFlat = flattened
 
         this.isDragStarted = true;
     }
@@ -77,7 +77,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
     view(vnode: m.Vnode<Attr, this>) {
         return (
             <>
-                {Bookmarks.draggedFlat && Bookmarks.draggedFlat >= vnode.attrs.flattenedIndex  ? 
+                {Bookmarks.draggedFlat != undefined && Bookmarks.draggedFlat >= vnode.attrs.flattenedIndex  ? 
                     <HighlightSpace 
                         crd={vnode.key}
                         index={vnode.attrs.index} 
@@ -87,17 +87,17 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
                     style={`margin-left: calc(4px * ${vnode.attrs.nest})`}
                     draggable={true}
                     data-crd={vnode.key}
-                    onclick={() => FileManagerModel.openFile(vnode.attrs.path)}
+                    onclick={() => FileModel.openFile(vnode.attrs.path)}
                     ondragenter={() => this.onDragEnterLeave()}
                     ondragleave={() => this.onDragEnterLeave()}
-                    ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs)}
+                    ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs.index, vnode.attrs.flattenedIndex)}
                     ondragend={() => this.onDragEnd()}
                     ondrop={!this.isDragStarted ? (ev: DragEvent) => this.onDrop(ev, vnode.attrs) : undefined}
                     ondragover={!this.isDragStarted ? (ev: DragEvent) => ev.preventDefault() : undefined}>
                     <span className="rover-emojicon">{vnode.attrs.emojicon}</span>
                     {vnode.attrs.name}
                 </div>
-                {Bookmarks.draggedFlat && Bookmarks.draggedFlat <= vnode.attrs.flattenedIndex ? 
+                {Bookmarks.draggedFlat != undefined && Bookmarks.draggedFlat <= vnode.attrs.flattenedIndex ? 
                     <HighlightSpace 
                         crd={vnode.key}
                         index={vnode.attrs.index + 1} 

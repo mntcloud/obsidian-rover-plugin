@@ -47,10 +47,10 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
 
     }
 
-    onFolderDragStart(ev: DragEvent, attr: Attr) {
-        ev.dataTransfer!.setData("application/rover.bookmark", attr.index.toString())
-        Bookmarks.draggedFlat = attr.flattenedIndex
-        Bookmarks.dragged = [attr.index]
+    onFolderDragStart(ev: DragEvent, index: number, flattened: number) {
+        ev.dataTransfer!.setData("application/rover.bookmark", index.toString())
+        Bookmarks.draggedFlat = flattened
+        Bookmarks.dragged = [index]
         this.isDragStarted = true;
     }
 
@@ -68,6 +68,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
             folder.children = [dragged]
         }
 
+        Bookmarks.dropZone = []
         Bookmarks.saveBookmarks()
         m.redraw()
     }
@@ -101,7 +102,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
                     data-index={vnode.attrs.index}
                     data-crd={vnode.key}
                     ondrop={(ev: DragEvent) => this.handleDrop(ev, vnode.attrs)}
-                    ondragstart={(ev: DragEvent) => this.onFolderDragStart(ev, vnode.attrs)}
+                    ondragstart={(ev: DragEvent) => this.onFolderDragStart(ev, vnode.attrs.index, vnode.attrs.flattenedIndex)}
                     ondragover={(ev: DragEvent) => ev.preventDefault()}
                     ondragend={() => this.onDragEnd()}
                     onclick={() => { this.isCollapsed = !this.isCollapsed }}>
@@ -119,7 +120,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
 
                 {!this.isCollapsed ?
                     <ListBookmarks
-                        inheritedIndex={vnode.attrs.index}
+                        inheritedIndex={vnode.attrs.flattenedIndex}
                         items={vnode.attrs.bookmarks}
                         nest={vnode.attrs.nest} /> : null}
 
