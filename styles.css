@@ -103,7 +103,8 @@
 .rover-recents-others {
     overflow-x: hidden;
     overflow-y: auto;
-    max-height: 160px;
+    padding: 10px 0px;
+    max-height: 75px;
 }
 
 .rover-recents-others > .rover-file {
