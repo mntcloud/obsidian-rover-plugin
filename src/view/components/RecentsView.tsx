@@ -31,29 +31,15 @@ export class RecentsView implements m.ClassComponent {
                 Recents.list = Recents.list.filter((path) => path != file.path)
                 Recents.saveRecents()
             }),
-            Obsidian!.vault.on("rename", async (file) => {
+            Obsidian!.vault.on("rename", async (file, oldPath) => {
                 if (file.path == Obsidian!.workspace.getActiveFile()?.path) {
                     Recents.active = Obsidian!.workspace.getActiveFile()?.path
-
                     m.redraw()
                 } else {
-                    if (Recents.pendingNewFolderPath == file.path) {    
-                        for (let i = 0; i < Recents.list.length; i++) {
-                            const path = Recents.list[i]
-                            const stat = await Obsidian!.vault.adapter.stat(path)
+                    const index = Recents.list.indexOf(oldPath)
 
-                            if (!stat) {
-                                if (path.contains(Recents.oldFolderPath!)) {
-                                    Recents.list[i] = path.replace(Recents.oldFolderPath!, Recents.pendingNewFolderPath)                                    
-                                } else {
-                                    Recents.list[i] = Recents.pendingNewFolderPath
-                                }
-                            }
-                        }
-
-                        Recents.pendingNewFolderPath = undefined
-                        Recents.oldFolderPath = undefined
-
+                    if (index > -1) {
+                        Recents.list[index] = file.path
                         Recents.saveRecents()
                     }
                 }
