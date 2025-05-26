@@ -3,7 +3,7 @@ import * as utils from "utils";
 import { HighlightSpace } from "./HighlightSpace";
 
 import { Bookmarks } from "view/models/BookmarksModel";
-import { FileModel } from "view/models/FileManagerModel";
+import { ExplorerModel } from "view/models/ExplorerModel";
 
 interface Attr {
     flattenedIndex: number,
@@ -87,7 +87,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
                     style={`margin-left: calc(4px * ${vnode.attrs.nest})`}
                     draggable={true}
                     data-crd={vnode.key}
-                    onclick={() => FileModel.openFile(vnode.attrs.path)}
+                    onclick={() => ExplorerModel.openFile(vnode.attrs.path)}
                     ondragenter={() => this.onDragEnterLeave()}
                     ondragleave={() => this.onDragEnterLeave()}
                     ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs.index, vnode.attrs.flattenedIndex)}

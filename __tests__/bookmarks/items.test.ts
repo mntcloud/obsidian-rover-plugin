@@ -5,7 +5,7 @@
 import m from "mithril"
 import { Bookmarks } from "view/models/BookmarksModel";
 
-import { FileManagerModel } from "view/models/FileManagerModel";
+import { ExplorerModel } from "view/models/ExplorerModel";
 import { Root } from "../misc/root.component";
 
 jest.mock("view/models/BookmarksModel", () => {
@@ -19,7 +19,7 @@ jest.mock("view/models/BookmarksModel", () => {
 const bookmarksMocked = jest.mocked(Bookmarks)
 
 jest.mock("view/models/FileManagerModel")
-const fileManagerMocked = jest.mocked(FileManagerModel)
+const fileManagerMocked = jest.mocked(ExplorerModel)
 
 describe("BookmarksItem", () => {
     beforeAll(() => {
