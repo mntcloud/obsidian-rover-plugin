@@ -35,6 +35,14 @@ export class File implements m.ClassComponent<Attr> {
         }
     }
 
+    onupdate(vnode: m.VnodeDOM<Attr, this>) {
+        if (this.isEdited) {
+
+            const input = vnode.dom.querySelector("input")!
+
+            input?.focus()
+        } 
+    }
     
 
     handleContextMenu(ev: PointerEvent, path: string) {
@@ -105,7 +113,7 @@ export class File implements m.ClassComponent<Attr> {
                 ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs.path)}
                 ondragend={(ev: DragEvent) => this.onDragEnd(ev)}
                 oncontextmenu={(ev: PointerEvent) => this.handleContextMenu(ev, vnode.attrs.path)}
-                onclick={!this.isEdited ? () => FileModel.openFile(vnode.attrs.path).then(() => m.redraw()) : undefined}>
+                onclick={!this.isEdited ? () => ExplorerModel.openFile(vnode.attrs.path).then(() => m.redraw()) : undefined}>
                 {!this.isEdited ? 
                     <span>{!this.renameFieldText ? vnode.attrs.name : this.renameFieldText}</span> : 
                     <input value={this.renameFieldText} 
