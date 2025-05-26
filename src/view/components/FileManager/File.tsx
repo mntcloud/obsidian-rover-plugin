@@ -3,7 +3,7 @@ import m from "mithril";
 import { Menu } from "obsidian";
 import { Bookmarks } from "view/models/BookmarksModel";
 import { Obsidian } from "view/models/data/Obsidian";
-import { FileModel } from "view/models/FileManagerModel";
+import { ExplorerModel } from "view/models/ExplorerModel";
 
 interface Attr {
     name: string,
