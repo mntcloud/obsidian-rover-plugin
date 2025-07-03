@@ -5,7 +5,7 @@ import { EventRef } from "obsidian";
 
 import { Bookmarks } from "view/models/BookmarksModel";
 import { Obsidian } from "view/models/data/Obsidian";
-import { ExplorerModel } from "view/models/ExplorerModel";
+import { Explorer } from "view/models/ExplorerModel";
 import { Recents } from "view/models/RecentsModel";
 
 export class RecentsView implements m.ClassComponent {
@@ -77,7 +77,7 @@ export class RecentsView implements m.ClassComponent {
                             <div
                                 className="rover-file"
                                 draggable={true}
-                                onclick={() => ExplorerModel.openFile(file, true)}
+                                onclick={() => Explorer.openFile(file, true)}
                                 ondragend={this.onDragEnd}
                                 ondragstart={(ev: DragEvent) => this.onDragStart(ev, file)}>
                                 {file}

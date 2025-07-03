@@ -1,20 +1,13 @@
 import { Obsidian } from "./data/Obsidian"
 
-interface RecentsModel { 
+class RecentsModel {  
     pendingNewFolderPath?: string
     oldFolderPath?: string
 
-    active?: string,
-    list: string[],
-    
-    updateRecents: () => void,
-    saveRecents: () => void,
-}
+    active?: string
+    list: string[] = []
 
-export const Recents: RecentsModel = {
-    list: [],
-
-    updateRecents() {
+    updateRecents(): void {
         if (!Obsidian) {
             console.error("ROVER: app instance is unintialized")
             return
@@ -29,7 +22,7 @@ export const Recents: RecentsModel = {
         Recents.list = Recents.list.filter((path) => path != Recents.active)
 
         Recents.saveRecents()
-    },
+    }
 
     saveRecents() {
         if (!Obsidian) {
@@ -39,5 +32,7 @@ export const Recents: RecentsModel = {
 
         Obsidian.settings.recents = Recents.list
         Obsidian.save()
-    },
+    }
 }
+
+export const Recents = new RecentsModel() 
