@@ -6,7 +6,7 @@ import { File } from "./FileManager/File";
 import { Folder } from "./FileManager/Folder";
 import { RoverFile } from "view/models/data/Base";
 import { Obsidian } from "view/models/data/Obsidian";
-import { ExplorerModel } from "view/models/ExplorerModel";
+import { Explorer } from "view/models/ExplorerModel";
 
 export class ExplorerView implements m.ClassComponent {
     root: RoverFile[];
@@ -37,11 +37,11 @@ export class ExplorerView implements m.ClassComponent {
 
     oncreate(vnode: m.VnodeDOM<Attr, this>) {
         this.dom = vnode.dom
-        ExplorerModel.listenToVault(this.onVaultUpdate.bind(this));
+        Explorer.listenToVault(this.onVaultUpdate.bind(this));
     }
 
     onremove(vnode: m.VnodeDOM<Attr, this>) {
-        ExplorerModel.unlistenToVault()
+        Explorer.unlistenToVault()
     }
 
     async structureUpdate() {
@@ -52,7 +52,7 @@ export class ExplorerView implements m.ClassComponent {
             const stat = await Obsidian!.vault.adapter.stat(item.path);
 
             newRoot.push({
-                mtime: stat!.mtime,
+                mtime: stat!.ctime,
                 name: stat!.type != "folder"
                     ? basename(item.name, ".md")
                     : item.name,
@@ -61,7 +61,7 @@ export class ExplorerView implements m.ClassComponent {
             });
         }
 
-        newRoot.sort((fileA, fileB) => fileA.isFolder ? -1 : 0);
+        newRoot.sort(Explorer.comparator);
         this.root = newRoot;
     }
 

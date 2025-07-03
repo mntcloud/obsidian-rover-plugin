@@ -3,7 +3,7 @@ import m from "mithril";
 import { Menu } from "obsidian";
 import { Bookmarks } from "view/models/BookmarksModel";
 import { Obsidian } from "view/models/data/Obsidian";
-import { ExplorerModel } from "view/models/ExplorerModel";
+import { Explorer } from "view/models/ExplorerModel";
 
 interface Attr {
     name: string,
@@ -26,12 +26,18 @@ export class File implements m.ClassComponent<Attr> {
             const file = Obsidian!.vault.getFileByPath(path)!
             
             if (file.parent) {
-                await Obsidian!.vault.rename(file, `${file.parent.path}/${this.renameFieldText}.${file.extension}`)
+                await Obsidian!.app.fileManager.renameFile(file, `${file.parent.path}/${this.renameFieldText}.${file.extension}`)
             } else {
-                await Obsidian!.vault.rename(file, `${this.renameFieldText}.${file.extension}`)
+                await Obsidian!.app.fileManager.renameFile(file, `${this.renameFieldText}.${file.extension}`)
             }
 
             this.isEdited = false
+            this.renameFieldText = undefined
+        }
+
+        if (ev.code == "Escape") {
+            this.isEdited = false
+            this.renameFieldText = undefined
         }
     }
 
@@ -40,7 +46,7 @@ export class File implements m.ClassComponent<Attr> {
 
             const input = vnode.dom.querySelector("input")!
 
-            input?.focus()
+            input?.focus({ preventScroll: true });
         } 
     }
     
@@ -108,12 +114,12 @@ export class File implements m.ClassComponent<Attr> {
     view(vnode: m.Vnode<Attr, this>) {
         return (
             <div 
-                className="rover-file" style={`margin-left: calc(4px * ${vnode.attrs.nest})`}
+                className="rover-file" style={`margin-left: calc(6px * ${vnode.attrs.nest})`}
                 draggable={true}
                 ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs.path)}
                 ondragend={(ev: DragEvent) => this.onDragEnd(ev)}
                 oncontextmenu={(ev: PointerEvent) => this.handleContextMenu(ev, vnode.attrs.path)}
-                onclick={!this.isEdited ? () => ExplorerModel.openFile(vnode.attrs.path).then(() => m.redraw()) : undefined}>
+                onclick={!this.isEdited ? () => Explorer.openFile(vnode.attrs.path).then(() => m.redraw()) : undefined}>
                 {!this.isEdited ? 
                     <span>{!this.renameFieldText ? vnode.attrs.name : this.renameFieldText}</span> : 
                     <input value={this.renameFieldText} 
