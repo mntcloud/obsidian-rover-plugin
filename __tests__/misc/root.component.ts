@@ -5,6 +5,6 @@ import { Bookmarks } from "view/models/BookmarksModel"
 
 export const Root = {
   view: function () {
-    return m(ListBookmarks, {inheritedIndex: -1, items: Bookmarks.items, nest: -1})
+    return m(ListBookmarks, {inheritedPosition: [], items: Bookmarks.items, nest: -1})
   }
 }

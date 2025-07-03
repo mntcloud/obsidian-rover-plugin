@@ -1,28 +1,29 @@
-import { App, Modal, Setting } from 'obsidian';
+import { App, Modal, Setting } from "obsidian";
 
 export class ModifyItemModal extends Modal {
-  emoji: string
-  newName: string
-  
+  emoji: string;
+  newName: string;
+
   constructor(
-    app: App, 
+    app: App,
     oldName: string,
     emojicon: string,
-    defaultPath: string, 
-    onSubmit: (name: string, emoji: string, path: string) => void
+    onSubmit: (name: string, emoji: string, path?: string) => void,
+    path?: string,
   ) {
     super(app);
-    this.setTitle('Modify the bookmark');
+    this.setTitle("Modify the folder or bookmark");
 
-    this.newName = oldName
+    this.newName = oldName;
     new Setting(this.contentEl)
-      .setName('Name')
+      .setName("Name")
       .addText((text) =>
         text.setValue(this.newName).onChange((value) => {
           this.newName = value;
-        }));
+        })
+      );
 
-    this.emoji = emojicon
+    this.emoji = emojicon;
     new Setting(this.contentEl)
       .setName("Emoji")
       .setDesc("Click on the field below and Use WIN + ;")
@@ -31,32 +32,28 @@ export class ModifyItemModal extends Modal {
           .setValue(this.emoji)
           .onChange((value) => {
             if (this.emoji && this.emoji != value) {
-              this.emoji = value.slice(this.emoji.length)
+              this.emoji = value.slice(this.emoji.length);
               text.setValue(this.emoji);
             } else {
               this.emoji = value;
             }
           });
-      })
-
-    let path = defaultPath;
-    new Setting(this.contentEl)
-      .setName('Path')
-      .addText((text) =>
-        text
-          .setValue(path)
-          .onChange((value) => {
-            path = value;
-          }));
+      });
+    if (path) {
+      new Setting(this.contentEl)
+        .setName("Path")
+        .setDesc(`The path you set is: ${path}`);
+    }
 
     new Setting(this.contentEl)
       .addButton((btn) =>
         btn
-          .setButtonText('Submit')
+          .setButtonText("Submit")
           .setCta()
           .onClick(() => {
             this.close();
             onSubmit(this.newName, this.emoji, path);
-          }));
+          })
+      );
   }
 }

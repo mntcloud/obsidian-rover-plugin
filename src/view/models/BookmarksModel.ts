@@ -1,119 +1,146 @@
-import { ModifyItemModal } from "modals/bookmarks/ModifyItem"
-import { RoverBookmark } from "./data/Base"
-import { Obsidian } from "./data/Obsidian"
+import { ModifyItemModal } from "modals/bookmarks/ModifyItem";
+import { RoverBookmark } from "./data/Base";
+import { Obsidian } from "./data/Obsidian";
 
-import m from "mithril"
+import m from "mithril";
 
-import * as utils from "utils"
-import { CreateFolderModal } from "modals/bookmarks/CreateFolder"
+import * as utils from "utils";
+import { CreateFolderModal } from "modals/bookmarks/CreateFolder";
+import { CreateItemModal } from "modals/bookmarks/CreateItem";
+import { EventRef } from "obsidian";
 
-interface BookmarksModel {
-    items: RoverBookmark[],
-    isTesting: boolean,
-    isFileDragStarted: boolean,
+class BookmarksModel {
+    evrefs: EventRef[]    
 
-    dropZone: number[],
+    items: RoverBookmark[] = [];
+    isTesting = false;
+    isFileDragStarted = false;
 
-    dragged: number[],
-    draggedFlat?: number,
+    dragged: {
+        pos: number[];
+    } | undefined = undefined;
+
+    listenToVault() {
+        this.evrefs = [
+            Obsidian!.vault.on("rename", (file, old) => {
+                const item = this.find(old) 
+
+                if (item) {
+                    item.path = file.path
+
+                    this.save()
+                }
+            })
+        ]
+    }
+
+    unlistenToVault() {
+        for (const evref of this.evrefs) {
+            Obsidian!.vault.offref(evref);
+        }
+    }
 
 
-    openCreateFolderModal: () => void
-    createFolder: (name: string, emojicon: string) => void
+    openCreateItem(pos: number[], path: string) {
+        new CreateItemModal(
+            Obsidian!.app,
+            path,
+            (name, emoji, path) => {
+                const seq = this.follow(pos)
 
-    openModifyItemModal: (name: string, emojicon: string, path: string) => void
-    modifyItem: (name: string, emojicon: string, path: string) => void
+                seq.splice(pos[pos.length - 1], 0, {
+                    crd: Date.now(),
+                    name: name,
+                    emojicon: emoji,
+                    path: path,
+                });
 
-    saveBookmarks: () => void
-    
-    follow: (position: number[]) => RoverBookmark[]
-    followAndPush: (position: number[], element: RoverBookmark) => void
-    followAndRemove: (position: number[]) => RoverBookmark
-    updatePositions: (example: number[], target: number[]) => void
-    locateDropZone: (target: HTMLElement, index: number) => void,
-}
+                this.save();
 
-export const Bookmarks: BookmarksModel = {
-    items: [],
-    isTesting: false,
-    isFileDragStarted: false,
+                m.redraw();
+            },
+        ).open();
+    }
 
-    dropZone: [],
-
-    dragged: [],
-
-    openCreateFolderModal() {
+    openCreateFolderModal(pos: number[]) {
         if (!Obsidian) {
             console.error("ROVER: no instance of obsidian");
             return;
         }
 
         new CreateFolderModal(Obsidian.app, (name, emoji) => {
-            Bookmarks.createFolder(name, emoji)
+            this.createFolder(name, emoji, pos);
 
-            Bookmarks.saveBookmarks()
-            Bookmarks.dragged = []
-            Bookmarks.draggedFlat = undefined
+            this.save();
+            this.dragged = undefined;
 
-            m.redraw()
+            m.redraw();
         }).open();
-    },
+    }
 
-    createFolder(name, emojicon) {
-        const currentTree = Bookmarks.follow(Bookmarks.dropZone)
-        const currentBookmark = Object.assign({}, currentTree[Bookmarks.dropZone[0]]) // clone
+    // TODO: rewrite this using new techniques from move function
+    createFolder(name: string, emojicon: string, zone: number[]) {
+        const currentTree = this.follow(zone);
+        const currentBookmark = Object.assign({}, currentTree[zone[0]]); // clone
 
-        const draggedBookmark = Bookmarks.followAndRemove(Bookmarks.dragged)
-        Bookmarks.updatePositions(Bookmarks.dragged, Bookmarks.dropZone)
+        const draggedBookmark = this.delete(this.dragged!.pos);
+        this.updatePositions(this.dragged!.pos, zone);
 
-        currentTree[Bookmarks.dropZone[0]] = {
+        currentTree[zone[0]] = {
             name: name,
             emojicon: emojicon,
             crd: Date.now(),
             path: undefined,
 
-            children: [currentBookmark, draggedBookmark]
-        }
-    },
+            children: [currentBookmark, draggedBookmark],
+        };
+    }
 
-    openModifyItemModal(name, emojicon, path) {
+    openModifyItemModal(
+        name: string,
+        emojicon: string,
+        pos: number[],
+        path?: string,
+    ) {
         if (!Obsidian) {
-            return
+            return;
         }
 
-        new ModifyItemModal(Obsidian.app, name, emojicon, path, (newName, newEmoji, newPath) => {
-            Bookmarks.modifyItem(newName, newEmoji, newPath)
-            Bookmarks.saveBookmarks()
-        }).open();
-    },
+        new ModifyItemModal(
+            Obsidian.app,
+            name,
+            emojicon,
+            (newName, newEmoji, path) => {
+                this.update(newName, newEmoji, pos, path);
+                this.save();
+                m.redraw();
+            },
+            path,
+        ).open();
+    }
 
-    modifyItem(name, emojicon, path) {
-        const item = Bookmarks.follow(Bookmarks.dropZone)[Bookmarks.dropZone[0]]
+    update(name: string, emojicon: string, pos: number[], path?: string) {
+        const item = this.follow(pos)[pos[0]];
 
-        item.name = name
-        item.emojicon = emojicon
-        item.path = path
-    },
+        item.name = name;
+        item.emojicon = emojicon;
 
-    saveBookmarks() {
+        if (path) {
+            item.path = path;
+        }
+    }
+
+    save() {
         if (!Obsidian) {
-            utils.error("obsidian: uninitialized")
-            return
+            utils.error("obsidian: uninitialized");
+            return;
         }
 
-        Obsidian.settings.bookmarks = Bookmarks.items
-        Obsidian.save()
-    },
+        Obsidian.settings.bookmarks = this.items;
+        Obsidian.save();
+    }
 
-    locateDropZone(target: HTMLElement, index: number) {
-        Bookmarks.dropZone = []
-        Bookmarks.dropZone.push(index)
-
-        const event = new Event("locateDropZone", { bubbles: true })
-        target.dispatchEvent(event)
-    },
-
-    updatePositions(example, target) {
+    updatePositions(example: number[], target: number[]) {
         if (example.length > target.length) {
             return; // changes did nothing to target positions
         }
@@ -123,46 +150,85 @@ export const Bookmarks: BookmarksModel = {
         while (i >= 0) {
             if (i == 0) {
                 if (example[i] < target[j]) {
-                    target[j]--
+                    target[j]--;
                 }
             }
 
             if (example[i] != target[j]) {
-                break
+                break;
             }
 
-            i--; j--
+            i--;
+            j--;
         }
-    },
+    }
 
     // TODO: check for children field and if it doesn't exist, print an error in console
     follow(position: number[]) {
-        let current = Bookmarks.items
-        let positionIndex = position.length - 1
+        let current = this.items;
+        let positionIndex = 0;
 
-        while (positionIndex != 0) {
-            current = current[position[positionIndex]].children!
+        // NOTE: code was written to go from the end of the array
+        while (positionIndex != position.length - 1) {
+            current = current[position[positionIndex]].children!;
 
-            positionIndex--
+            positionIndex++;
         }
 
         return current;
-    },
+    }
 
-    followAndPush(position: number[], element: RoverBookmark) {
-        const current = Bookmarks.follow(position)
+    find(path: string, items: RoverBookmark[] = this.items): RoverBookmark | null {
+        for (const item of items) {
+            if (item.children) {
+                const res = this.find(path, item.children)
 
-        current.splice(position[0], 0, element)
-    },
+                if (res) {
+                    return res
+                }
+            } else {
+                if (item.path == path) {
+                    return item
+                }
+            }
+        }
 
-    followAndRemove(position: number[]) {
-        const current = Bookmarks.follow(position)
+        return null
+    }
 
-        const target = current[position[0]];
+    move(to: number[], item: RoverBookmark) {
+        const seq = this.follow(to);
+        const oldLength = seq.length;
 
-        // well node doesn't have remove function
-        current.splice(position[0], 1);
+        this.delete(this.dragged!.pos);
 
-        return target
+        // check if op above modifies the sequence
+        if (oldLength > seq.length) {
+            const destination = to[to.length - 1];
+
+            if (
+                this.dragged!.pos[this.dragged!.pos.length - 1] >
+                    destination
+            ) {
+                seq.splice(destination, 0, item);
+            } else {
+                seq.splice(destination - 1, 0, item);
+            }
+        } else {
+            seq.splice(to[to.length - 1], 0, item);
+        }
+    }
+
+    delete(position: number[]) {
+        const current = this.follow(position);
+
+        const target = current[position[position.length - 1]];
+
+        // well, nodejs (our testing env) doesn't have remove function
+        current.splice(position[position.length - 1], 1);
+
+        return target;
     }
 }
+
+export const Bookmarks = new BookmarksModel();

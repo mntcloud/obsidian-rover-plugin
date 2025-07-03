@@ -5,56 +5,29 @@ import { RoverBookmark } from "view/models/data/Base"
 
 
 interface Attr {
-    inheritedIndex: number,
+    inheritedPosition: number[],
     items: RoverBookmark[],
     nest: number
 }
 
-export class ListBookmarks implements m.ClassComponent<Attr> {
-    count(items: RoverBookmark[], inherited: number) {
-        let flattened = inherited
-        let index = 0
-
-        while (index != items.length) {
-            const item = items[index]
-
-            if (item.children) {
-                flattened = this.count(item.children, flattened + 1)
-            } else {
-                flattened++
-            }
-
-            index++
-        }
-
-        return flattened
-    }
-
+export class ListBookmarks implements m.ClassComponent<Attr> { 
     view(vnode: m.Vnode<Attr, this>) {
-        let flattened = vnode.attrs.inheritedIndex
-
         return <>
             {vnode.attrs.items.map((bookmark, index) => {
                 if (bookmark.children) {
-                    const flattenedIndex = flattened + 1
-
-                    flattened = this.count(bookmark.children, flattenedIndex)
-
                     return (
                         <BookmarkFolder
-                            flattenedIndex={flattenedIndex}
-                            key={bookmark.crd} index={index}
+                            key={bookmark.crd} 
+                            position={vnode.attrs.inheritedPosition.concat(index)} 
                             name={bookmark.name} emojicon={bookmark.emojicon}
                             bookmarks={bookmark.children} nest={vnode.attrs.nest + 1} />
                     )
                 } else {
-                    flattened++
-
                     return (
                         <BookmarkItem
                             path={bookmark.path}
-                            flattenedIndex={flattened}
-                            index={index} key={bookmark.crd} nest={vnode.attrs.nest + 1}
+                            position={vnode.attrs.inheritedPosition.concat(index)}
+                            key={bookmark.crd} nest={vnode.attrs.nest + 1}
                             name={bookmark.name} emojicon={bookmark.emojicon} />
                     )
                 }
