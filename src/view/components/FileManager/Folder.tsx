@@ -50,6 +50,8 @@ export class Folder implements m.ClassComponent<Attr> {
         if (ev.code == "Escape") {
             this.action = undefined;
         }
+
+        m.redraw()
     }
 
     oninit(vnode: m.Vnode<Attr, this>) {
