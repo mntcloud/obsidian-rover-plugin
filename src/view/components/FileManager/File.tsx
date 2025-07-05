@@ -39,6 +39,8 @@ export class File implements m.ClassComponent<Attr> {
             this.isEdited = false
             this.renameFieldText = undefined
         }
+
+        m.redraw()
     }
 
     onupdate(vnode: m.VnodeDOM<Attr, this>) {
