@@ -120,7 +120,9 @@ class BookmarksModel {
     }
 
     update(name: string, emojicon: string, pos: number[], path?: string) {
-        const item = this.follow(pos)[pos[0]];
+        const item = this.follow(pos)[pos[pos.length - 1]];
+
+        console.log(item, pos, this.follow(pos))
 
         item.name = name;
         item.emojicon = emojicon;
