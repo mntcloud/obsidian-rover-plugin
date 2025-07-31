@@ -149,7 +149,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
                     className={`rover-bookmark-folder ${
                         !this.isCollapsed ? "open" : ""
                     }`}
-                    style={`margin-left: calc(4px * ${vnode.attrs.nest})`}
+                    style={`margin-left: calc(8px * ${vnode.attrs.nest})`}
                     draggable={true}
                     data-crd={vnode.key}
                     oncontextmenu={(ev: MouseEvent) =>
