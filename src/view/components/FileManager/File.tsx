@@ -101,6 +101,8 @@ export class File implements m.ClassComponent<Attr> {
 
 
         menu.showAtMouseEvent(ev)
+
+        return false;
     }
 
     onDragStart(ev: DragEvent, path: string) {

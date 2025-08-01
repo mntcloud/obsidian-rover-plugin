@@ -197,6 +197,8 @@ export class Folder implements m.ClassComponent<Attr> {
         }
 
         menu.showAtMouseEvent(ev);
+
+        return false;
     }
 
     async reveal(path: string) {
