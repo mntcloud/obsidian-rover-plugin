@@ -182,7 +182,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
                     >
                         <path d="m9 18 6-6-6-6" />
                     </svg>
-                    {vnode.attrs.name}
+                    <span>{vnode.attrs.name}</span>
                 </div>
 
                 {!this.isCollapsed

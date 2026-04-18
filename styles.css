@@ -6,6 +6,7 @@
 .rover-bookmark-item, .rover-bookmark-folder {
     display: flex;
     align-items: center;
+    flex: none;
 }
 
 .rover-bookmark-item {
@@ -20,7 +21,13 @@
     overflow-y: scroll;
     overflow-x: hidden;
     flex: 0 auto;
+    height: 100%;
+    padding: 10px 0;
     margin-bottom: unset;
+}
+
+.rover-file-manager.highlight { 
+    background-color: var(--background-primary-alt);
 }
 
 .rover-bookmarks-container {
@@ -60,13 +67,17 @@
     padding: 2px 0px;
 }
 
-.rover-bookmark-folder > .lucide-chevron-right {
+.rover-bookmark-folder > .lucide-chevron-right { 
     margin-right: 2.5px;
     transition: transform 0.1s ease-in-out;
 }
 
 .rover-bookmark-folder.open > .lucide-chevron-right {
     transform: rotate(90deg);
+}
+
+.rover-bookmark-folder > span {
+    width: fit-content;
 }
 
 .rover-emojicon {
@@ -106,7 +117,7 @@
     color: var(--text-normal);
 }
 
-.rover-folder-container > .rover-action-create {
+.rover-action-create {
     width: fit-content;
     height: 40px;
     display: flex;
@@ -186,7 +197,8 @@
 
 .rover-lucide {
     height: var(--icon-size);
-    width: var(--icon-width);
+    width: var(--icon-size);
+    flex: none;
     stroke-width: var(--icon-stroke);
     color: var(--nav-folder-collapse-color);
 }

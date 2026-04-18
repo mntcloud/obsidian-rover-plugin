@@ -1,102 +1,107 @@
-import { App, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
-import { RoverSidebarView, VIEW_TYPE } from 'view/RoverSidebarView';
+import {
+  App,
+  Plugin,
+  PluginSettingTab,
+  Setting,
+  WorkspaceLeaf
+} from "obsidian";
+import { RoverSidebarView, VIEW_TYPE } from "view/RoverSidebarView";
 
 import * as utils from "./utils";
-import { initDataSource, Obsidian, RoverPluginSettings } from 'view/models/data/Obsidian';
-import { Recents } from 'view/models/RecentsModel';
+import {
+  initDataSource,
+  Obsidian,
+  RoverPluginSettings
+} from "view/models/data/Obsidian";
+import { Recents } from "view/models/RecentsModel";
 import { Bookmarks } from "view/models/BookmarksModel";
 
 const DEFAULT_SETTINGS: RoverPluginSettings = {
-	mySetting: 'default',
-	bookmarks: [],
-	recents: [],	
-}
+  mySetting: "default",
+  bookmarks: [],
+  recents: []
+};
 
 export default class RoverPlugin extends Plugin {
-	settings: RoverPluginSettings;
+  settings: RoverPluginSettings;
 
-	async onload() {
+  async onload() {
+    await this.loadSettings();
 
+    initDataSource(this.app, this.settings, () => {
+      this.settings = Obsidian!.settings;
+      this.saveSettings();
+    });
 
-		await this.loadSettings();
+    Bookmarks.items = this.settings.bookmarks;
 
-		initDataSource(this.app, this.settings, () => {
-			this.settings = Obsidian!.settings
-			this.saveSettings()
-		})
+    Recents.list = this.settings.recents;
 
-		Bookmarks.items = this.settings.bookmarks
+    this.registerView(VIEW_TYPE, leaf => new RoverSidebarView(leaf));
 
-		Recents.list = this.settings.recents
+    this.app.workspace.onLayoutReady(async () => {
+      await this.activateView();
+    });
 
-		this.registerView(
-			VIEW_TYPE,
-			(leaf) => new RoverSidebarView(leaf)
-		)
+    // This adds a settings tab so the user can configure various aspects of the plugin
+    this.addSettingTab(new RoverSettingTab(this.app, this));
 
-		this.app.workspace.onLayoutReady(async () => {
+    utils.log("deployed on Obsidian");
+  }
 
-			await this.activateView();
-		});
+  async onunload() {
+    const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
 
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new RoverSettingTab(this.app, this));
+    leaves.forEach(leaf => {
+      leaf.detach();
+    });
+  }
 
-		utils.log("deployed on Obsidian");
-	}
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
 
-	async onunload() {
-		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE)
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
 
-		leaves.forEach((leaf) => {
-			leaf.detach();
-		});
-	}
+  async activateView() {
+    const { workspace } = this.app;
 
-	async loadSettings() {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
+    const leaves = workspace.getLeavesOfType(VIEW_TYPE);
 
-	async saveSettings() {
-		await this.saveData(this.settings);
-	}
+    if (!leaves.length) {
+      const leaf: WorkspaceLeaf | null = workspace.getLeftLeaf(false)!;
 
-	async activateView() {
-		const { workspace } = this.app;
-
-
-		const leaves = workspace.getLeavesOfType(VIEW_TYPE);
-
-		if (!leaves.length) {
-			const leaf: WorkspaceLeaf | null = workspace.getLeftLeaf(false)!;
-
-			await leaf.setViewState({ type: VIEW_TYPE, active: true });
-		}
-	}
+      await leaf.setViewState({ type: VIEW_TYPE, active: true });
+    }
+  }
 }
 
 class RoverSettingTab extends PluginSettingTab {
-	plugin: RoverPlugin;
+  plugin: RoverPlugin;
 
-	constructor(app: App, plugin: RoverPlugin) {
-		super(app, plugin);
-		this.plugin = plugin;
-	}
+  constructor(app: App, plugin: RoverPlugin) {
+    super(app, plugin);
+    this.plugin = plugin;
+  }
 
-	display(): void {
-		const { containerEl } = this;
+  display(): void {
+    const { containerEl } = this;
 
-		containerEl.empty();
+    containerEl.empty();
 
-		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
-			.addText(text => text
-				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
-				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
-					await this.plugin.saveSettings();
-				}));
-	}
+    new Setting(containerEl)
+      .setName("Setting #1")
+      .setDesc("It's a secret")
+      .addText(text =>
+        text
+          .setPlaceholder("Enter your secret")
+          .setValue(this.plugin.settings.mySetting)
+          .onChange(async value => {
+            this.plugin.settings.mySetting = value;
+            await this.plugin.saveSettings();
+          })
+      );
+  }
 }

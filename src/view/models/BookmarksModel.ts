@@ -62,14 +62,14 @@ class BookmarksModel {
         ).open();
     }
 
-    openCreateFolderModal(pos: number[]) {
+    openCreateFolderModal(firstItem: number[], secondItem: number[]) {
         if (!Obsidian) {
             console.error("ROVER: no instance of obsidian");
             return;
         }
 
         new CreateFolderModal(Obsidian.app, (name, emoji) => {
-            this.createFolder(name, emoji, pos);
+            this.createFolder(name, emoji, firstItem, secondItem);
 
             this.save();
             this.dragged = undefined;
@@ -79,14 +79,14 @@ class BookmarksModel {
     }
 
     // TODO: rewrite this using new techniques from move function
-    createFolder(name: string, emojicon: string, zone: number[]) {
-        const currentTree = this.follow(zone);
-        const currentBookmark = Object.assign({}, currentTree[zone[0]]); // clone
+    createFolder(name: string, emojicon: string, dragged: number[], drop: number[]) {
+        const currentTree = this.follow(drop);
+        const currentBookmark = Object.assign({}, currentTree[drop[0]]); // clone
 
-        const draggedBookmark = this.delete(this.dragged!.pos);
-        this.updatePositions(this.dragged!.pos, zone);
+        const draggedBookmark = this.delete(dragged);
+        this.updatePositions(dragged, drop);
 
-        currentTree[zone[0]] = {
+        currentTree[drop[0]] = {
             name: name,
             emojicon: emojicon,
             crd: Date.now(),

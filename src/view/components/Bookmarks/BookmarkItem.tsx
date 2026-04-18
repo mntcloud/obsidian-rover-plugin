@@ -30,6 +30,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
     }
 
     onDragStart(ev: DragEvent, attrs: Attr, key: number) {
+        
         Bookmarks.dragged = {
             pos: attrs.position,
         };
@@ -48,6 +49,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
     }
 
     onDragEnd() {
+        console.log(`DRAGEND, checkpoint`)
         if (Bookmarks.dragged) {
             Bookmarks.dragged = undefined;
         }
@@ -92,6 +94,8 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
     }
 
     onDrop(ev: DragEvent, attr: Attr) {
+        console.log(`DROP, checkpoint`)
+
         if (!ev.dataTransfer) {
             utils.error("BOOKMARK_ITEM: data transfer is undefined...");
             return;
@@ -99,7 +103,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
 
         switch (true) {
             case ev.dataTransfer.types.includes("application/rover.bookmark"): {
-                Bookmarks.openCreateFolderModal(attr.position);
+                Bookmarks.openCreateFolderModal(Bookmarks.dragged!.pos, attr.position);
                 break;
             }
             case ev.dataTransfer.types.includes("application/rover.file"): {
