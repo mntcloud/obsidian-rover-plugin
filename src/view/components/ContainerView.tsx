@@ -4,7 +4,7 @@ import { ExplorerView } from "./ExplorerView";
 import { RecentsView } from "./RecentsView";
 import { BookmarksView } from "./BookmarksView";
 
-import { Bookmarks } from "view/models/BookmarksModel";
+import { Bookmarks } from "rover/view/models";
 
 export class ContainerView implements m.ClassComponent {
   onDragStart(ev: DragEvent) {
@@ -24,7 +24,7 @@ export class ContainerView implements m.ClassComponent {
     }
   }
 
-  view(vnode: m.Vnode<Attr, this>) {
+  view(vnode: m.Vnode<{}, this>) {
     return (
       <div
         class="rover"

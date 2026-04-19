@@ -5,6 +5,8 @@
 *.iml
 .idea
 
+.test-out
+
 # npm
 node_modules
 

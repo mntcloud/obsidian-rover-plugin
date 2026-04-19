@@ -1,12 +1,14 @@
 {
   "compilerOptions": {
-    "baseUrl": "src",
-    "inlineSources": true,
+  "paths": {
+  "rover/*": ["./src/*"]
+  },
+  "inlineSources": true,
     "module": "ESNext",
     "target": "ES6",
     "allowJs": true,
     "noImplicitAny": true,
-    "moduleResolution": "node",
+    "types": ["node", "mithril", "obsidian"],
     "importHelpers": true,
     "jsx": "react",
     "jsxFactory": "m",

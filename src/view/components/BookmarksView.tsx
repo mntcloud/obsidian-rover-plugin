@@ -1,9 +1,9 @@
 import m from "mithril";
 
 import { CreateItemModal } from "../../modals/bookmarks/CreateItem";
-import { RoverBookmark } from "view/models/data/Base";
-import { Bookmarks } from "view/models/BookmarksModel";
-import { Obsidian } from "view/models/data/Obsidian";
+import { RoverBookmark } from "rover/view/models/app/core";
+import { Bookmarks } from "rover/view/models";
+import { Obsidian } from "rover/view/models/app";
 import { ListBookmarks } from "./Bookmarks/ListBookmarks";
 
 interface Attr {
@@ -11,8 +11,6 @@ interface Attr {
 }
 
 export class BookmarksView implements m.ClassComponent<Attr> {
-  height: number;
-
   oncreate(vnode: m.VnodeDOM<Attr, this>) {
     Bookmarks.listenToVault();
   }

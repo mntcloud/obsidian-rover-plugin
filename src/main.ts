@@ -5,16 +5,12 @@ import {
   Setting,
   WorkspaceLeaf
 } from "obsidian";
-import { RoverSidebarView, VIEW_TYPE } from "view/RoverSidebarView";
+import { RoverSidebarView, VIEW_TYPE } from "rover/view/RoverSidebarView";
 
 import * as utils from "./utils";
-import {
-  initDataSource,
-  Obsidian,
-  RoverPluginSettings
-} from "view/models/data/Obsidian";
-import { Recents } from "view/models/RecentsModel";
-import { Bookmarks } from "view/models/BookmarksModel";
+import { init, Obsidian } from "rover/view/models/app";
+import { RoverPluginSettings } from "rover/view/models/app/core";
+import { Recents, Bookmarks } from "rover/view/models";
 
 const DEFAULT_SETTINGS: RoverPluginSettings = {
   mySetting: "default",
@@ -23,12 +19,12 @@ const DEFAULT_SETTINGS: RoverPluginSettings = {
 };
 
 export default class RoverPlugin extends Plugin {
-  settings: RoverPluginSettings;
+  settings!: RoverPluginSettings;
 
   async onload() {
     await this.loadSettings();
 
-    initDataSource(this.app, this.settings, () => {
+    init(this.app, this.settings, () => {
       this.settings = Obsidian!.settings;
       this.saveSettings();
     });

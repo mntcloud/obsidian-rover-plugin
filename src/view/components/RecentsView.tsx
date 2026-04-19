@@ -3,14 +3,11 @@
 import m from "mithril";
 import { EventRef } from "obsidian";
 
-import { Bookmarks } from "view/models/BookmarksModel";
-import { Obsidian } from "view/models/data/Obsidian";
-import { Explorer } from "view/models/ExplorerModel";
-import { Recents } from "view/models/RecentsModel";
+import { Bookmarks, Explorer, Recents } from "rover/view/models";
+import { Obsidian } from "rover/view/models/app";
 
 export class RecentsView implements m.ClassComponent {
-  height: number;
-  vaultEvRef: EventRef[];
+  vaultEvRef!: EventRef[];
   workspaceEvRef?: EventRef;
 
   onDragStart(ev: DragEvent, path: string) {
@@ -23,7 +20,7 @@ export class RecentsView implements m.ClassComponent {
     Bookmarks.isFileDragStarted = false;
   }
 
-  oncreate(vnode: m.VnodeDOM<Attr, this>) {
+  oncreate(vnode: m.VnodeDOM<{}, this>) {
     // TODO: rework methods to combine with FileSystem handlers
     //       it should help to control m.redraw() more reliable
     this.vaultEvRef = [
@@ -56,12 +53,12 @@ export class RecentsView implements m.ClassComponent {
     m.redraw();
   }
 
-  onremove(vnode: m.VnodeDOM<Attr, this>) {
+  onremove(vnode: m.VnodeDOM<{}, this>) {
     this.vaultEvRef.forEach(ref => Obsidian!.vault.offref(ref));
     Obsidian!.workspace.offref(this.workspaceEvRef!);
   }
 
-  view(_vnode: m.Vnode<Attr, this>) {
+  view(_vnode: m.Vnode<{}, this>) {
     return (
       <div className="rover-container rover-recents">
         <div

@@ -1,27 +1,29 @@
 import m from "mithril";
 
 import { basename, dirname } from "node:path";
-import { RoverFile } from "./data/Base";
-import { Obsidian } from "./data/Obsidian";
-import { Recents } from "./RecentsModel";
+import { RoverFile } from "./app/core";
+import type { ObsidianAppModel } from "./app/core";
+import { RecentsBaseModel } from "./RecentsModel";
 import { EventRef } from "obsidian";
 
-class ExplorerModel {
+export class ExplorerBaseModel {
   isBeingTested = false;
   updateWaitlist: Record<string, boolean> = {};
   evrefs: EventRef[] = [];
+
+  constructor(private obsidian: ObsidianAppModel | undefined, private recentsModel: RecentsBaseModel) {}
 
   listenToVault(
     onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>
   ) {
     this.evrefs = [
-      Obsidian!.vault.on("create", file =>
+      this.obsidian!.vault.on("create", file =>
         this.onCreateDelete(file.path, onDOMUpdate)
       ),
-      Obsidian!.vault.on("rename", (file, oldPath) =>
+      this.obsidian!.vault.on("rename", (file, oldPath) =>
         this.onRename(file.path, oldPath, onDOMUpdate)
       ),
-      Obsidian!.vault.on("delete", file =>
+      this.obsidian!.vault.on("delete", file =>
         this.onCreateDelete(file.path, onDOMUpdate)
       )
     ];
@@ -55,8 +57,7 @@ class ExplorerModel {
     // NOTE:
     // Rename handler can be invoked, when folder is renamed or moved
     // and Vault API will pass some uncessary same looking old and new paths,
-    // except they have this folder as an ancestor. I'm trying to follow lazy
-    // aproach here, so I don't call update several times.
+    // except they have this folder as an ancestor.
     //
     // EXAMPLE:
     // NEW: dev/hacking/rover/file.md
@@ -88,8 +89,7 @@ class ExplorerModel {
     } else {
       const path = old.slice(0, old.length - 1).join("/");
 
-      console.log();
-      if (await Obsidian?.vault.adapter.stat(path)) {
+      if (await this.obsidian?.vault.adapter.stat(path)) {
         await onDOMUpdate(path ? false : true, path ? path : undefined);
 
         const newPath = cur.slice(0, cur.length - 1).join("/");
@@ -108,7 +108,7 @@ class ExplorerModel {
 
   unlistenToVault() {
     for (const evref of this.evrefs) {
-      Obsidian!.vault.offref(evref);
+      this.obsidian!.vault.offref(evref);
     }
   }
 
@@ -137,25 +137,25 @@ class ExplorerModel {
   }
 
   async openFile(path: string, openNewTab = false) {
-    if (!Obsidian) {
+    if (!this.obsidian) {
       console.error("ROVER: workspace is not initialized");
       return;
     }
 
-    const leaf = Obsidian.workspace.getLeaf(openNewTab);
-    const file = Obsidian.vault.getFileByPath(path);
+    const leaf = this.obsidian.workspace.getLeaf(openNewTab);
+    const file = this.obsidian.vault.getFileByPath(path);
 
     if (file) {
-      Recents.updateRecents();
+      this.recentsModel.updateRecents();
       await leaf.openFile(file);
     }
   }
 
   async moveFile(path: string, destination: string) {
-    const file = Obsidian!.vault.getFileByPath(path)!;
+    const file = this.obsidian!.vault.getFileByPath(path)!;
 
     if (file.parent && file.parent.path != destination) {
-      await Obsidian!.app.fileManager.renameFile(
+      await this.obsidian!.app.fileManager.renameFile(
         file,
         `${destination}/${file.name}`
       );
@@ -165,10 +165,10 @@ class ExplorerModel {
   }
 
   async moveFolder(path: string, destination: string) {
-    const file = Obsidian!.vault.getFolderByPath(path)!;
+    const file = this.obsidian!.vault.getFolderByPath(path)!;
 
     if (file.parent && file.parent.path != destination) {
-      await Obsidian!.app.fileManager.renameFile(
+      await this.obsidian!.app.fileManager.renameFile(
         file,
         `${destination}/${file.name}`
       );
@@ -178,23 +178,23 @@ class ExplorerModel {
   }
 
   async renameFolder(path: string, newName: string) {
-    const file = Obsidian!.vault.getFolderByPath(path)!;
+    const file = this.obsidian!.vault.getFolderByPath(path)!;
 
     if (file.parent && !file.parent.isRoot()) {
-      await Obsidian!.app.fileManager.renameFile(
+      await this.obsidian!.app.fileManager.renameFile(
         file,
         `${file.parent.path}/${newName}`
       );
     } else {
-      await Obsidian!.app.fileManager.renameFile(file, `${newName}`);
+      await this.obsidian!.app.fileManager.renameFile(file, `${newName}`);
     }
   }
 
   async getFiles(path: string) {
     const files: RoverFile[] = [];
 
-    for (const item of Obsidian!.vault.getFolderByPath(path)!.children) {
-      const stat = await Obsidian!.vault.adapter.stat(item.path);
+    for (const item of this.obsidian!.vault.getFolderByPath(path)!.children) {
+      const stat = await this.obsidian!.vault.adapter.stat(item.path);
 
       if (!stat) {
         console.warn(`ROVER: Unable to get stat for ${item.path}`);
@@ -214,5 +214,3 @@ class ExplorerModel {
     return files;
   }
 }
-
-export const Explorer = new ExplorerModel();

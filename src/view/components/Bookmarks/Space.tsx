@@ -1,7 +1,7 @@
 import m from "mithril";
-import * as utils from "utils";
-import { Bookmarks } from "view/models/BookmarksModel";
-import { RoverBookmark } from "view/models/data/Base";
+import * as utils from "rover/utils";
+import { Bookmarks } from "rover/view/models";
+import { RoverBookmark } from "rover/view/models/app/core";
 
 interface Attr {
   position: number[];
