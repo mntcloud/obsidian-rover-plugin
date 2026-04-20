@@ -7,13 +7,13 @@
 // Good news: DragEvents are almost the same as MouseEvents
 
 (() => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return;
   }
 
   // Polyfill not needed
 
-  if (typeof window.DragEvent !== 'undefined') {
+  if (typeof window.DragEvent !== "undefined") {
     return;
   }
 
@@ -30,7 +30,7 @@
   // Using this so we can quickly look up an items
   // data without needing to go through the public async API
   // to get item values
-  const fastItemValueLookup = Symbol('item-value');
+  const fastItemValueLookup = Symbol("item-value");
 
   /**
    * Note: this polyfill does not implement "read/write", "read-only" or "protected"
@@ -65,7 +65,7 @@
       if (stringValueOrFile instanceof File) {
         /** @type DataTransferItem */
         const item = {
-          kind: 'file',
+          kind: "file",
           // The type of file being dragged (eg "image/jpeg")
           type: stringValueOrFile.type,
           getAsFile: () => {
@@ -75,7 +75,7 @@
             // callback will never be resolved for files
           },
           webkitGetAsEntry() {
-            throw new Error('webkitGetAsEntry() not implemented');
+            throw new Error("webkitGetAsEntry() not implemented");
           },
           // This allows us to lookup items synchronously with `dataTransfer.getData()`
           [fastItemValueLookup]: stringValueOrFile,
@@ -83,32 +83,32 @@
         this.push(item);
         return item;
       }
-      if (typeof stringValueOrFile === 'string') {
+      if (typeof stringValueOrFile === "string") {
         // `type` gets converted to lowercase according to the spec
         const type = stringMimeType.toLocaleLowerCase();
         // Throws if adding data to a type that already has data
         const exists = this.some(
-          item => item.kind === 'string' && item.type === type,
+          (item) => item.kind === "string" && item.type === type,
         );
         if (exists) {
-          throw new DOMException('NotSupportedError');
+          throw new DOMException("NotSupportedError");
         }
 
         /** @type DataTransferItem */
         const item = {
-          kind: 'string',
+          kind: "string",
           type,
           getAsFile: () => {
             // this will be `null` for non-files
             return null;
           },
-          getAsString: callback => {
+          getAsString: (callback) => {
             setTimeout(() => {
               callback(stringValueOrFile);
             });
           },
           webkitGetAsEntry() {
-            throw new Error('webkitGetAsEntry() not implemented');
+            throw new Error("webkitGetAsEntry() not implemented");
           },
           // This allows us to lookup items synchronously with `dataTransfer.getData()`
           [fastItemValueLookup]: stringValueOrFile,
@@ -117,7 +117,7 @@
         return item;
       }
       throw new Error(
-        'Unexpected arguments. Expected: .add(file: File) or .add(data: string, type: string)',
+        "Unexpected arguments. Expected: .add(file: File) or .add(data: string, type: string)",
       );
     }
 
@@ -150,13 +150,13 @@
 
     // shorthands
 
-    if (lower === 'text') {
-      return { format: 'text/plain', convertToURL: true };
+    if (lower === "text") {
+      return { format: "text/plain", convertToURL: true };
     }
     // From spec:
     // If format equals "url", change it to "text/uri-list" and set convert-to-URL to true.
-    if (lower === 'url') {
-      return { format: 'text/uri-list', convertToURL: true };
+    if (lower === "url") {
+      return { format: "text/uri-list", convertToURL: true };
     }
     return { format: lower, convertToURL: false };
   }
@@ -170,11 +170,11 @@
     constructor() {
       // From spec:
       // > Set the dropEffect and effectAllowed to "none".
-      this.dropEffect = 'none';
+      this.dropEffect = "none";
 
       // Not implementing mode restrictions so this can be set in testing
       // for any event
-      this.effectAllowed = 'none';
+      this.effectAllowed = "none";
 
       // DataTransferItemList() is usually a hidden constructor
       this.items = new DataTransferItemList();
@@ -186,11 +186,11 @@
      * https://html.spec.whatwg.org/multipage/dnd.html#concept-datatransfer-types
      */
     get types() {
-      const all = this.items.map(item => {
-        if (item.kind === 'string') {
+      const all = this.items.map((item) => {
+        if (item.kind === "string") {
           return item.type;
         }
-        return 'Files';
+        return "Files";
       });
       // it is possible to have multiple 'Files' entries
       // so we need to strip them out
@@ -205,7 +205,7 @@
      */
     get files() {
       return this.items
-        .filter(item => item.kind === 'file')
+        .filter((item) => item.kind === "file")
         .reduce((acc, item, index) => {
           const file = item.getAsFile();
           acc[index] = file;
@@ -222,7 +222,7 @@
     clearData(format) {
       if (format) {
         const actualFormat = getFormat(format).format;
-        const index = this.items.findIndex(item => {
+        const index = this.items.findIndex((item) => {
           // Note: can never clear files with `clearData`
           return item.type === actualFormat;
         });
@@ -239,7 +239,7 @@
       // items without messing up indexes
       for (let i = this.items.length - 1; i >= 0; i--) {
         const item = this.items[i];
-        if (item.kind === 'string') {
+        if (item.kind === "string") {
           this.items.remove(i);
         }
       }
@@ -254,10 +254,10 @@
     getData(format) {
       const result = getFormat(format);
       const match = this.items.find(
-        item => item.kind === 'string' && item.type === result.format,
+        (item) => item.kind === "string" && item.type === result.format,
       );
       if (!match) {
-        return '';
+        return "";
       }
 
       const value = match[fastItemValueLookup];
@@ -274,12 +274,12 @@
         // - CR: Carriage Return '\r'
         // - LF: Line Feed '\n'
         // - EOL: End of Line '\r\n'
-        .split('\r\n')
+        .split("\r\n")
         // a uri-list can have comment lines starting with '#'
         // so we need to remove those
-        .filter(piece => !piece.startsWith('#'));
+        .filter((piece) => !piece.startsWith("#"));
 
-      return urls[0] ?? '';
+      return urls[0] ?? "";
     }
 
     /** This function is only used to set string items
@@ -305,7 +305,7 @@
   }
   window.DataTransfer = DataTransfer;
 
-  class DragEvent extends MouseEvent {
+  class DragEvent extends window.MouseEvent {
     constructor(type, eventInitDict = {}) {
       super(type, eventInitDict);
 

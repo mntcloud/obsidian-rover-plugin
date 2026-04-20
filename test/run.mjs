@@ -2,6 +2,8 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync, statSync } from "node:fs";
 import { glob } from "node:fs/promises";
+import { join } from "node:path";
+import builtins from "builtin-modules";
 import * as esbuild from "esbuild";
 
 const tsc = spawnSync("yarn", ["tsc", "--noEmit"], {
@@ -27,17 +29,45 @@ const ctx = await esbuild.context({
   platform: "node",
   format: "esm",
   outExtension: { ".js": ".mjs" },
+  external: [
+    "jsdom",
+    "electron",
+    "@codemirror/autocomplete",
+    "@codemirror/collab",
+    "@codemirror/commands",
+    "@codemirror/language",
+    "@codemirror/lint",
+    "@codemirror/search",
+    "@codemirror/state",
+    "@codemirror/view",
+    "@lezer/common",
+    "@lezer/highlight",
+    "@lezer/lr",
+    ...builtins,
+  ],
   outdir: OUT,
   plugins: [
     {
       name: "good-guy-qa",
       setup(build) {
+        build.onResolve({ filter: /obsidian/ }, (args) => {
+          return { path: join(process.cwd(), "test/mocks/obsidian.ts") };
+        });
+
         build.onEnd((_) => {
-          spawnSync("node", ["--enable-source-maps", "--test"], {
-            stdio: "inherit",
-            shell: true,
-            cwd: ".test-out",
-          });
+          spawnSync(
+            "node",
+            [
+              "--enable-source-maps",
+              "--experimental-test-module-mocks",
+              "--test",
+            ],
+            {
+              stdio: "inherit",
+              shell: true,
+              cwd: ".test-out",
+            },
+          );
         });
       },
     },
