@@ -21,7 +21,7 @@ export class RecentsBaseModel {
 
     this.active = this.obsidian.workspace.getActiveFile()?.path;
 
-    this.list = this.list.filter(path => path != this.active);
+    this.list = this.list.filter((path) => path != this.active);
 
     this.saveRecents();
   }

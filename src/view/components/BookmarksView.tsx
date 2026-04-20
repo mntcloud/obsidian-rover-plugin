@@ -36,7 +36,7 @@ export class BookmarksView implements m.ClassComponent<Attr> {
             crd: Date.now(),
             name: name,
             emojicon: emoji,
-            path: path
+            path: path,
           });
 
           Bookmarks.save();

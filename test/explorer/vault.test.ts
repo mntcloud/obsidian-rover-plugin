@@ -16,14 +16,14 @@ const mockedObsidian = {
   vault: {
     getRoot: () =>
       ({
-        children: []
-      } as any),
+        children: [],
+      }) as any,
     adapter: {
-      stat: mock.fn<(normalizePath: string) => Promise<Stat | null>>()
+      stat: mock.fn<(normalizePath: string) => Promise<Stat | null>>(),
     },
-    configDir: ""
+    configDir: "",
   },
-  save: () => {}
+  save: () => {},
 };
 
 describe("Vault Listeners", () => {
@@ -32,7 +32,7 @@ describe("Vault Listeners", () => {
   before(() => {
     Explorer = new ExplorerBaseModel(
       mockedObsidian as any,
-      new RecentsBaseModel(mockedObsidian as any)
+      new RecentsBaseModel(mockedObsidian as any),
     );
 
     Explorer.isBeingTested = true;
@@ -49,11 +49,11 @@ describe("Vault Listeners", () => {
     renameMap.set("folderB/subfolder2/file3.md", "folderA/subfolder2/file3.md");
     renameMap.set(
       "folderB/subfolder2/subfolder3",
-      "folderA/subfolder2/subfolder3"
+      "folderA/subfolder2/subfolder3",
     );
     renameMap.set(
       "folderB/subfolder2/subfolder3/file4.md",
-      "folderA/subfolder2/subfolder3/file4.md"
+      "folderA/subfolder2/subfolder3/file4.md",
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -61,7 +61,7 @@ describe("Vault Listeners", () => {
         console.log(`STAT: ${path}`);
 
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -88,7 +88,7 @@ describe("Vault Listeners", () => {
     renameMap.set(`${newBasePath}/subfolder1`, `${oldBasePath}/subfolder1`);
     renameMap.set(
       `${newBasePath}/subfolder1/file2.md`,
-      `${oldBasePath}/subfolder1/file2.md`
+      `${oldBasePath}/subfolder1/file2.md`,
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -110,7 +110,7 @@ describe("Vault Listeners", () => {
           "folderA/folderB/folderC": { type: "folder", size: 0 },
           "folderA/folderB/folderC/folderD": {
             type: "folder",
-            size: 0
+            size: 0,
           }, // Parent of oldBasePath
 
           // New path's parent and its ancestors
@@ -119,7 +119,7 @@ describe("Vault Listeners", () => {
           "folderC/folderD/folderE": { type: "folder", size: 0 },
           "folderC/folderD/folderE/folderF": {
             type: "folder",
-            size: 0
+            size: 0,
           }, // Parent of newBasePath
 
           // New path itself and its contents
@@ -128,8 +128,8 @@ describe("Vault Listeners", () => {
           [`${newBasePath}/subfolder1`]: { type: "folder", size: 0 },
           [`${newBasePath}/subfolder1/file2.md`]: {
             type: "file",
-            size: 100
-          }
+            size: 100,
+          },
         };
 
         if (existingPathData[path]) {
@@ -137,11 +137,11 @@ describe("Vault Listeners", () => {
             type: existingPathData[path].type,
             ctime: now,
             mtime: now,
-            size: existingPathData[path].size
+            size: existingPathData[path].size,
           };
         }
         return null; // For any other path not specified
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -150,8 +150,8 @@ describe("Vault Listeners", () => {
       assert(
         [
           "folderA/folderB/folderC/folderD", // Parent of oldBasePath
-          "folderC/folderD/folderE/folderF" // Parent of newBasePath
-        ].includes(path!)
+          "folderC/folderD/folderE/folderF", // Parent of newBasePath
+        ].includes(path!),
       );
     });
 
@@ -173,7 +173,7 @@ describe("Vault Listeners", () => {
     renameMap.set("folderA/folderC/subfolder1", "folderA/folderB/subfolder1");
     renameMap.set(
       "folderA/folderC/subfolder1/file2.md",
-      "folderA/folderB/subfolder1/file2.md"
+      "folderA/folderB/subfolder1/file2.md",
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -189,8 +189,8 @@ describe("Vault Listeners", () => {
           "folderA/folderC/subfolder1": { type: "folder", size: 0 },
           "folderA/folderC/subfolder1/file2.md": {
             type: "file",
-            size: 100
-          }
+            size: 100,
+          },
         };
 
         if (existingPathData[path]) {
@@ -198,12 +198,12 @@ describe("Vault Listeners", () => {
             type: existingPathData[path].type,
             ctime: now,
             mtime: now,
-            size: existingPathData[path].size
+            size: existingPathData[path].size,
           };
         }
         // For "folderA/folderB" (old path) or any other unspecified path, return null.
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -226,7 +226,7 @@ describe("Vault Listeners", () => {
     renameMap.set("folderB/folderC/folderA/subfolder1", "folderA/subfolder1");
     renameMap.set(
       "folderB/folderC/folderA/subfolder1/file2.md",
-      "folderA/subfolder1/file2.md"
+      "folderA/subfolder1/file2.md",
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -240,11 +240,11 @@ describe("Vault Listeners", () => {
             type: "folder",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 0
+            size: 0,
           };
         }
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -276,7 +276,7 @@ describe("Vault Listeners", () => {
             type: "file",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 100
+            size: 100,
           };
         }
         // Assume parent folders exist for simplicity in this test's stat mock
@@ -285,11 +285,11 @@ describe("Vault Listeners", () => {
             type: "folder",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 0
+            size: 0,
           };
         }
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -320,7 +320,7 @@ describe("Vault Listeners", () => {
     renameMap.set(`${newBase}/subfolder1`, `${oldBase}/subfolder1`);
     renameMap.set(
       `${newBase}/subfolder1/file2.md`,
-      `${oldBase}/subfolder1/file2.md`
+      `${oldBase}/subfolder1/file2.md`,
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -343,15 +343,15 @@ describe("Vault Listeners", () => {
           "folderD/folderB/folderB": { type: "folder", size: 0 }, // New parent part 3
           "folderD/folderB/folderB/folderB": {
             type: "folder",
-            size: 0
+            size: 0,
           }, // New parent part 4 (parent of newBase)
           [newBase]: { type: "folder", size: 0 },
           [`${newBase}/file1.md`]: { type: "file", size: 100 },
           [`${newBase}/subfolder1`]: { type: "folder", size: 0 },
           [`${newBase}/subfolder1/file2.md`]: {
             type: "file",
-            size: 100
-          }
+            size: 100,
+          },
         };
 
         if (existingPathData[path]) {
@@ -359,11 +359,11 @@ describe("Vault Listeners", () => {
             type: existingPathData[path].type,
             ctime: now,
             mtime: now,
-            size: existingPathData[path].size
+            size: existingPathData[path].size,
           };
         }
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -372,7 +372,7 @@ describe("Vault Listeners", () => {
       // Old parent: folderB/folderB
       // New parent: folderD/folderB/folderB/folderB
       assert(
-        ["folderB/folderB", "folderD/folderB/folderB/folderB"].includes(path!)
+        ["folderB/folderB", "folderD/folderB/folderB/folderB"].includes(path!),
       );
     });
 
@@ -397,7 +397,7 @@ describe("Vault Listeners", () => {
     renameMap.set(`${newBase}/subfolder1`, `${oldBase}/subfolder1`);
     renameMap.set(
       `${newBase}/subfolder1/file2.md`,
-      `${oldBase}/subfolder1/file2.md`
+      `${oldBase}/subfolder1/file2.md`,
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -421,8 +421,8 @@ describe("Vault Listeners", () => {
           [`${newBase}/subfolder1`]: { type: "folder", size: 0 },
           [`${newBase}/subfolder1/file2.md`]: {
             type: "file",
-            size: 100
-          }
+            size: 100,
+          },
         };
 
         if (existingPathData[path]) {
@@ -430,11 +430,11 @@ describe("Vault Listeners", () => {
             type: existingPathData[path].type,
             ctime: now,
             mtime: now,
-            size: existingPathData[path].size
+            size: existingPathData[path].size,
           };
         }
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -463,7 +463,7 @@ describe("Vault Listeners", () => {
     renameMap.set(`${newBase}/childFolder`, `${oldBase}/childFolder`);
     renameMap.set(
       `${newBase}/childFolder/file2.md`,
-      `${oldBase}/childFolder/file2.md`
+      `${oldBase}/childFolder/file2.md`,
     );
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
@@ -485,7 +485,7 @@ describe("Vault Listeners", () => {
             type: "folder",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 0
+            size: 0,
           };
         }
         if (path === `${newBase}/file1.md`) {
@@ -493,7 +493,7 @@ describe("Vault Listeners", () => {
             type: "file",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 100
+            size: 100,
           };
         }
         if (path === `${newBase}/childFolder/file2.md`) {
@@ -501,11 +501,11 @@ describe("Vault Listeners", () => {
             type: "file",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 100
+            size: 100,
           };
         }
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {
@@ -544,7 +544,7 @@ describe("Vault Listeners", () => {
             type: "file",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 100
+            size: 100,
           };
         }
         // The parent folder "folder1" should exist.
@@ -553,11 +553,11 @@ describe("Vault Listeners", () => {
             type: "folder",
             ctime: Date.now(),
             mtime: Date.now(),
-            size: 0
+            size: 0,
           };
         }
         return null;
-      }
+      },
     );
 
     const onUpdate = mock.fn(async (isRoot: boolean, path?: string) => {

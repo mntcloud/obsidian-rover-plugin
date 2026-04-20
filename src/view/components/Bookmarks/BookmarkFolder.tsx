@@ -44,7 +44,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
   onMenu(ev: MouseEvent, attr: Attr) {
     const menu = new Menu();
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Edit...")
         .setIcon("pen-line")
@@ -52,12 +52,12 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
           Bookmarks.openModifyItemModal(
             attr.name,
             attr.emojicon,
-            attr.position
+            attr.position,
           );
-        })
+        }),
     );
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Delete")
         .setIcon("trash")
@@ -67,7 +67,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
           Bookmarks.save();
 
           m.redraw();
-        })
+        }),
     );
 
     menu.showAtMouseEvent(ev);
@@ -81,12 +81,12 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
         crd: key,
         name: attrs.name,
         emojicon: attrs.emojicon,
-        children: attrs.bookmarks
-      })
+        children: attrs.bookmarks,
+      }),
     );
 
     Bookmarks.dragged = {
-      pos: attrs.position
+      pos: attrs.position,
     };
 
     this.isDragStarted = true;
@@ -95,7 +95,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
   onDrop(ev: DragEvent, attr: Attr) {
     if (ev.dataTransfer?.types.includes("application/rover.bookmark")) {
       const item = JSON.parse(
-        ev.dataTransfer.getData("application/rover.bookmark")
+        ev.dataTransfer.getData("application/rover.bookmark"),
       ) as RoverBookmark;
 
       // Move to the top position
@@ -185,7 +185,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
           <Space
             crd={vnode.key}
             position={vnode.attrs.position.map((val, index) =>
-              index == vnode.attrs.position.length - 1 ? val + 1 : val
+              index == vnode.attrs.position.length - 1 ? val + 1 : val,
             )}
             noHighlight={this.isDragStarted}
             nest={vnode.attrs.nest}

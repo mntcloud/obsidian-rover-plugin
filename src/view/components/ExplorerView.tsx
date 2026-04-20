@@ -34,12 +34,12 @@ export class ExplorerView implements m.ClassComponent {
       const element = this.dom.querySelector(`div[data-path="${path}"]`);
 
       if (element) {
-        await new Promise(resolve => {
+        await new Promise((resolve) => {
           element.dispatchEvent(
             new CustomEvent("createdelete", {
               detail: { complete: resolve },
-              bubbles: false
-            })
+              bubbles: false,
+            }),
           );
         });
       }
@@ -109,7 +109,7 @@ export class ExplorerView implements m.ClassComponent {
     const menu = new Menu();
     const file = Obsidian!.vault.getRoot();
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("New subfolder")
         .setIcon("folder-plus")
@@ -117,18 +117,18 @@ export class ExplorerView implements m.ClassComponent {
         .onClick(async () => {
           this.action = {
             mode: "create",
-            value: ""
+            value: "",
           };
 
           m.redraw();
-        })
+        }),
     );
 
     Obsidian!.workspace.trigger(
       "file-menu",
       menu,
       file,
-      "file-explorer-context-menu"
+      "file-explorer-context-menu",
     );
 
     menu.showAtMouseEvent(ev);
@@ -154,7 +154,7 @@ export class ExplorerView implements m.ClassComponent {
         mtime: stat!.ctime,
         name: stat!.type != "folder" ? basename(item.name, ".md") : item.name,
         path: item.path,
-        isFolder: stat!.type == "folder"
+        isFolder: stat!.type == "folder",
       });
     }
 
@@ -209,7 +209,7 @@ export class ExplorerView implements m.ClassComponent {
           </div>
         ) : null}
         {this.root.length
-          ? this.root.map(file => {
+          ? this.root.map((file) => {
               return file.isFolder ? (
                 <Folder
                   key={file.mtime}

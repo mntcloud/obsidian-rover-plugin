@@ -34,7 +34,7 @@ export class Space implements m.ClassComponent<Attr> {
 
     if (ev.dataTransfer.types.includes("application/rover.bookmark")) {
       const item = JSON.parse(
-        ev.dataTransfer.getData("application/rover.bookmark")
+        ev.dataTransfer.getData("application/rover.bookmark"),
       ) as RoverBookmark;
 
       Bookmarks.move(attr.position, item);

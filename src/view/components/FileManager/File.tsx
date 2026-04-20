@@ -27,12 +27,12 @@ export class File implements m.ClassComponent<Attr> {
       if (file.parent) {
         await Obsidian!.app.fileManager.renameFile(
           file,
-          `${file.parent.path}/${this.renameFieldText}.${file.extension}`
+          `${file.parent.path}/${this.renameFieldText}.${file.extension}`,
         );
       } else {
         await Obsidian!.app.fileManager.renameFile(
           file,
-          `${this.renameFieldText}.${file.extension}`
+          `${this.renameFieldText}.${file.extension}`,
         );
       }
 
@@ -60,7 +60,7 @@ export class File implements m.ClassComponent<Attr> {
     const menu = new Menu();
     const file = Obsidian!.vault.getFileByPath(path)!;
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Make a copy")
         .setIcon("documents")
@@ -69,18 +69,18 @@ export class File implements m.ClassComponent<Attr> {
           if (file.parent) {
             await Obsidian!.vault.copy(
               file,
-              `${file.parent.path}/${file.basename} new.${file.extension}`
+              `${file.parent.path}/${file.basename} new.${file.extension}`,
             );
           } else {
             await Obsidian!.vault.copy(
               file,
-              `${file.basename} new.${file.extension}`
+              `${file.basename} new.${file.extension}`,
             );
           }
-        })
+        }),
     );
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Rename...")
         .setIcon("pen-line")
@@ -90,7 +90,7 @@ export class File implements m.ClassComponent<Attr> {
           this.isEdited = true;
 
           m.redraw();
-        })
+        }),
     );
 
     if (file) {
@@ -98,18 +98,18 @@ export class File implements m.ClassComponent<Attr> {
         "file-menu",
         menu,
         file,
-        "file-explorer-context-menu"
+        "file-explorer-context-menu",
       );
     }
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Delete")
         .setIcon("trash")
         .setSection("danger")
         .onClick(async () => {
           await Obsidian!.vault.trash(file, true);
-        })
+        }),
     );
 
     menu.showAtMouseEvent(ev);

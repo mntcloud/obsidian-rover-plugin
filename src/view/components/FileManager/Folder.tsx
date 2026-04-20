@@ -66,7 +66,7 @@ export class Folder implements m.ClassComponent<Attr> {
       this.nested = await Explorer.getFiles(path);
     }
     console.log(
-      `FOLDER ${path} ${performance.now()}: nested create delete and redraw`
+      `FOLDER ${path} ${performance.now()}: nested create delete and redraw`,
     );
     complete();
   }
@@ -88,7 +88,7 @@ export class Folder implements m.ClassComponent<Attr> {
     if (vnode.attrs.path != this.capturedPath && this.nested.length) {
       console.log(`New path: ${vnode.attrs.path} vs ${this.capturedPath}`);
 
-      Explorer.getFiles(vnode.attrs.path).then(files => {
+      Explorer.getFiles(vnode.attrs.path).then((files) => {
         this.nested = files;
         m.redraw();
       });
@@ -137,7 +137,7 @@ export class Folder implements m.ClassComponent<Attr> {
     const menu = new Menu();
     const folder = Obsidian!.vault.getFolderByPath(path)!;
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("New subfolder")
         .setIcon("folder-plus")
@@ -145,7 +145,7 @@ export class Folder implements m.ClassComponent<Attr> {
         .onClick(async () => {
           this.action = {
             mode: "create",
-            value: ""
+            value: "",
           };
 
           if (!this.nested.length) {
@@ -153,10 +153,10 @@ export class Folder implements m.ClassComponent<Attr> {
           }
 
           m.redraw();
-        })
+        }),
     );
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Rename...")
         .setIcon("folder-pen")
@@ -164,21 +164,21 @@ export class Folder implements m.ClassComponent<Attr> {
         .onClick(() => {
           this.action = {
             mode: "rename",
-            value: folder.name
+            value: folder.name,
           };
 
           m.redraw();
-        })
+        }),
     );
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Delete")
         .setIcon("trash")
         .setSection("danger")
         .onClick(async () => {
           await Obsidian!.vault.trash(folder, false);
-        })
+        }),
     );
 
     if (folder) {
@@ -186,7 +186,7 @@ export class Folder implements m.ClassComponent<Attr> {
         "file-menu",
         menu,
         folder,
-        "file-explorer-context-menu"
+        "file-explorer-context-menu",
       );
     }
 
@@ -240,7 +240,7 @@ export class Folder implements m.ClassComponent<Attr> {
           ondragstart={(ev: DragEvent) => {
             ev.dataTransfer!.setData(
               "application/rover.folder",
-              vnode.attrs.path
+              vnode.attrs.path,
             );
           }}
           style={`margin-left: calc(6px * ${vnode.attrs.nest})`}
@@ -309,7 +309,7 @@ export class Folder implements m.ClassComponent<Attr> {
             />
           </div>
         ) : null}
-        {this.nested.map(file => {
+        {this.nested.map((file) => {
           return file.isFolder ? (
             <Folder
               key={file.mtime}

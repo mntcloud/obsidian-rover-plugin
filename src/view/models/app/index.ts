@@ -4,7 +4,7 @@ import { RoverPluginSettings, ObsidianAppModel } from "./core";
 export function init(
   app: App,
   settings: RoverPluginSettings,
-  save: () => void
+  save: () => void,
 ) {
   Obsidian = {
     app: app, // for modals
@@ -12,7 +12,7 @@ export function init(
     vault: app.vault,
 
     settings: settings,
-    save: save
+    save: save,
   };
 }
 

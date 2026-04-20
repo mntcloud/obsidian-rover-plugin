@@ -3,7 +3,7 @@ import {
   Plugin,
   PluginSettingTab,
   Setting,
-  WorkspaceLeaf
+  WorkspaceLeaf,
 } from "obsidian";
 import { RoverSidebarView, VIEW_TYPE } from "rover/view/RoverSidebarView";
 
@@ -15,7 +15,7 @@ import { Recents, Bookmarks } from "rover/view/models";
 const DEFAULT_SETTINGS: RoverPluginSettings = {
   mySetting: "default",
   bookmarks: [],
-  recents: []
+  recents: [],
 };
 
 export default class RoverPlugin extends Plugin {
@@ -33,7 +33,7 @@ export default class RoverPlugin extends Plugin {
 
     Recents.list = this.settings.recents;
 
-    this.registerView(VIEW_TYPE, leaf => new RoverSidebarView(leaf));
+    this.registerView(VIEW_TYPE, (leaf) => new RoverSidebarView(leaf));
 
     this.app.workspace.onLayoutReady(async () => {
       await this.activateView();
@@ -48,7 +48,7 @@ export default class RoverPlugin extends Plugin {
   async onunload() {
     const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
 
-    leaves.forEach(leaf => {
+    leaves.forEach((leaf) => {
       leaf.detach();
     });
   }
@@ -90,14 +90,14 @@ class RoverSettingTab extends PluginSettingTab {
     new Setting(containerEl)
       .setName("Setting #1")
       .setDesc("It's a secret")
-      .addText(text =>
+      .addText((text) =>
         text
           .setPlaceholder("Enter your secret")
           .setValue(this.plugin.settings.mySetting)
-          .onChange(async value => {
+          .onChange(async (value) => {
             this.plugin.settings.mySetting = value;
             await this.plugin.saveSettings();
-          })
+          }),
       );
   }
 }

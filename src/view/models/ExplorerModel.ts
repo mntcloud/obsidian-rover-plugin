@@ -11,27 +11,30 @@ export class ExplorerBaseModel {
   updateWaitlist: Record<string, boolean> = {};
   evrefs: EventRef[] = [];
 
-  constructor(private obsidian: ObsidianAppModel | undefined, private recentsModel: RecentsBaseModel) {}
+  constructor(
+    private obsidian: ObsidianAppModel | undefined,
+    private recentsModel: RecentsBaseModel,
+  ) {}
 
   listenToVault(
-    onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>
+    onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>,
   ) {
     this.evrefs = [
-      this.obsidian!.vault.on("create", file =>
-        this.onCreateDelete(file.path, onDOMUpdate)
+      this.obsidian!.vault.on("create", (file) =>
+        this.onCreateDelete(file.path, onDOMUpdate),
       ),
       this.obsidian!.vault.on("rename", (file, oldPath) =>
-        this.onRename(file.path, oldPath, onDOMUpdate)
+        this.onRename(file.path, oldPath, onDOMUpdate),
       ),
-      this.obsidian!.vault.on("delete", file =>
-        this.onCreateDelete(file.path, onDOMUpdate)
-      )
+      this.obsidian!.vault.on("delete", (file) =>
+        this.onCreateDelete(file.path, onDOMUpdate),
+      ),
     ];
   }
 
   async onCreateDelete(
     file: string,
-    onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>
+    onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>,
   ) {
     if (this.countSegments(file)) {
       const dirpath = dirname(file);
@@ -49,7 +52,7 @@ export class ExplorerBaseModel {
   async onRename(
     curPath: string,
     oldPath: string,
-    onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>
+    onDOMUpdate: (isRoot: boolean, path?: string) => Promise<void>,
   ) {
     const cur = curPath.split("/");
     const old = oldPath.split("/");
@@ -75,11 +78,11 @@ export class ExplorerBaseModel {
       } else {
         await onDOMUpdate(
           newPath ? false : true,
-          newPath ? newPath : undefined
+          newPath ? newPath : undefined,
         );
         await onDOMUpdate(
           oldPath ? false : true,
-          oldPath ? oldPath : undefined
+          oldPath ? oldPath : undefined,
         );
       }
 
@@ -96,7 +99,7 @@ export class ExplorerBaseModel {
 
         await onDOMUpdate(
           newPath ? false : true,
-          newPath ? newPath : undefined
+          newPath ? newPath : undefined,
         );
 
         if (!this.isBeingTested) {
@@ -157,7 +160,7 @@ export class ExplorerBaseModel {
     if (file.parent && file.parent.path != destination) {
       await this.obsidian!.app.fileManager.renameFile(
         file,
-        `${destination}/${file.name}`
+        `${destination}/${file.name}`,
       );
     } else {
       console.log("SAME!");
@@ -170,7 +173,7 @@ export class ExplorerBaseModel {
     if (file.parent && file.parent.path != destination) {
       await this.obsidian!.app.fileManager.renameFile(
         file,
-        `${destination}/${file.name}`
+        `${destination}/${file.name}`,
       );
     } else {
       console.log("SAME!");
@@ -183,7 +186,7 @@ export class ExplorerBaseModel {
     if (file.parent && !file.parent.isRoot()) {
       await this.obsidian!.app.fileManager.renameFile(
         file,
-        `${file.parent.path}/${newName}`
+        `${file.parent.path}/${newName}`,
       );
     } else {
       await this.obsidian!.app.fileManager.renameFile(file, `${newName}`);
@@ -205,7 +208,7 @@ export class ExplorerBaseModel {
         mtime: stat!.type != "file" ? stat!.ctime : stat!.mtime,
         name: stat!.type != "folder" ? basename(item.name, ".md") : item.name,
         path: item.path,
-        isFolder: stat!.type == "folder"
+        isFolder: stat!.type == "folder",
       });
     }
 

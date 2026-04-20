@@ -12,7 +12,7 @@ export class ContainerView implements m.ClassComponent {
       switch (ev.dataTransfer.types[0]) {
         case "application/rover.file":
           Bookmarks.dragged = {
-            pos: [-1]
+            pos: [-1],
           };
       }
     }

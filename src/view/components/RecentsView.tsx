@@ -24,8 +24,8 @@ export class RecentsView implements m.ClassComponent {
     // TODO: rework methods to combine with FileSystem handlers
     //       it should help to control m.redraw() more reliable
     this.vaultEvRef = [
-      Obsidian!.vault.on("delete", file => {
-        Recents.list = Recents.list.filter(path => path != file.path);
+      Obsidian!.vault.on("delete", (file) => {
+        Recents.list = Recents.list.filter((path) => path != file.path);
         Recents.saveRecents();
       }),
       Obsidian!.vault.on("rename", async (file, oldPath) => {
@@ -40,7 +40,7 @@ export class RecentsView implements m.ClassComponent {
             Recents.saveRecents();
           }
         }
-      })
+      }),
     ];
 
     this.workspaceEvRef = Obsidian!.workspace.on("file-open", () => {
@@ -54,7 +54,7 @@ export class RecentsView implements m.ClassComponent {
   }
 
   onremove(vnode: m.VnodeDOM<{}, this>) {
-    this.vaultEvRef.forEach(ref => Obsidian!.vault.offref(ref));
+    this.vaultEvRef.forEach((ref) => Obsidian!.vault.offref(ref));
     Obsidian!.workspace.offref(this.workspaceEvRef!);
   }
 
@@ -71,7 +71,7 @@ export class RecentsView implements m.ClassComponent {
         </div>
 
         <div className="rover-recents-others">
-          {Recents.list.map(file => {
+          {Recents.list.map((file) => {
             return (
               <div
                 className="rover-file"

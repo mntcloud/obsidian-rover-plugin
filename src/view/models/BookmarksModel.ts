@@ -10,19 +10,19 @@ import { CreateItemModal } from "rover/modals/bookmarks/CreateItem";
 import { EventRef } from "obsidian";
 
 interface AvailableModals {
-	modifyItem: {
-		name: string,
-		emoji: string,
-		path?: string
-		onFinish: (name: string, emoji: string, path?: string) => void
-	},
-	createItem: {
-		path: string
-		onFinish: (name: string, emoji: string, path: string) => void
-	}
-	createFolder: {
-		onFinish: (name: string, emoji: string) => void
-	}
+  modifyItem: {
+    name: string;
+    emoji: string;
+    path?: string;
+    onFinish: (name: string, emoji: string, path?: string) => void;
+  };
+  createItem: {
+    path: string;
+    onFinish: (name: string, emoji: string, path: string) => void;
+  };
+  createFolder: {
+    onFinish: (name: string, emoji: string) => void;
+  };
 }
 
 export class BookmarksBaseModel {
@@ -38,9 +38,13 @@ export class BookmarksBaseModel {
       }
     | undefined = undefined;
 
-	constructor(
-		private obsidian: ObsidianAppModel | undefined,
-		private openModal: <Key extends keyof AvailableModals>(type: Key, args: AvailableModals[Key]) => void) { }
+  constructor(
+    private obsidian: ObsidianAppModel | undefined,
+    private openModal: <Key extends keyof AvailableModals>(
+      type: Key,
+      args: AvailableModals[Key],
+    ) => void,
+  ) {}
 
   listenToVault() {
     this.evrefs = [
@@ -52,7 +56,7 @@ export class BookmarksBaseModel {
 
           this.save();
         }
-      })
+      }),
     ];
   }
 
@@ -63,39 +67,41 @@ export class BookmarksBaseModel {
   }
 
   openCreateItem(pos: number[], path: string) {
-	  this.openModal("createItem", {
-		  path, onFinish: (name, emoji, path) => {
-			const seq = this.follow(pos);
+    this.openModal("createItem", {
+      path,
+      onFinish: (name, emoji, path) => {
+        const seq = this.follow(pos);
 
-      		seq.splice(pos[pos.length - 1], 0, {
-        		crd: Date.now(),
-          		name: name,
-            	emojicon: emoji,
-             	path: path
-        	});
+        seq.splice(pos[pos.length - 1], 0, {
+          crd: Date.now(),
+          name: name,
+          emojicon: emoji,
+          path: path,
+        });
 
-        	this.save();
+        this.save();
 
-         	m.redraw();
-		}
-    })
+        m.redraw();
+      },
+    });
   }
 
   openCreateFolderModal(firstItem: number[], secondItem: number[]) {
     if (!this.obsidian) {
       console.error("ROVER: no instance of obsidian");
       return;
-	}
+    }
 
-	  this.openModal("createFolder", {
-		  onFinish: (name, emoji) => {
-	      	this.createFolder(name, emoji, firstItem, secondItem);
+    this.openModal("createFolder", {
+      onFinish: (name, emoji) => {
+        this.createFolder(name, emoji, firstItem, secondItem);
 
-			this.save();
-      		this.dragged = undefined;
+        this.save();
+        this.dragged = undefined;
 
-        	m.redraw();
-    }})
+        m.redraw();
+      },
+    });
   }
 
   // TODO: rewrite this using new techniques from move function
@@ -103,7 +109,7 @@ export class BookmarksBaseModel {
     name: string,
     emojicon: string,
     dragged: number[],
-    drop: number[]
+    drop: number[],
   ) {
     const currentTree = this.follow(drop);
     const currentBookmark = Object.assign({}, currentTree[drop[0]]); // clone
@@ -117,7 +123,7 @@ export class BookmarksBaseModel {
       crd: Date.now(),
       path: undefined,
 
-      children: [currentBookmark, draggedBookmark]
+      children: [currentBookmark, draggedBookmark],
     };
   }
 
@@ -125,23 +131,25 @@ export class BookmarksBaseModel {
     name: string,
     emoji: string,
     pos: number[],
-    path?: string
+    path?: string,
   ) {
     if (!this.obsidian) {
       return;
     }
 
-	this.openModal("modifyItem", {
-		name, emoji, path,
-		onFinish: (newName, newEmoji, path) => {
-            this.update(newName, newEmoji, pos, path);
-            this.save();
-            m.redraw();
-		}
-	})
+    this.openModal("modifyItem", {
+      name,
+      emoji,
+      path,
+      onFinish: (newName, newEmoji, path) => {
+        this.update(newName, newEmoji, pos, path);
+        this.save();
+        m.redraw();
+      },
+    });
   }
 
-	update(name: string, emojicon: string, pos: number[], path?: string) {
+  update(name: string, emojicon: string, pos: number[], path?: string) {
     const item = this.follow(pos)[pos[pos.length - 1]];
 
     console.log(item, pos, this.follow(pos));
@@ -205,7 +213,7 @@ export class BookmarksBaseModel {
 
   find(
     path: string,
-    items: RoverBookmark[] = this.items
+    items: RoverBookmark[] = this.items,
   ): RoverBookmark | null {
     for (const item of items) {
       if (item.children) {

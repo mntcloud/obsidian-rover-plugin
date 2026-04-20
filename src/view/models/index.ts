@@ -15,7 +15,7 @@ export const Bookmarks = new BookmarksBaseModel(Obsidian, (type, args) => {
       args.name,
       args.emoji,
       args.onFinish,
-      args.path
+      args.path,
     ).open();
   }
 
@@ -25,7 +25,7 @@ export const Bookmarks = new BookmarksBaseModel(Obsidian, (type, args) => {
 
   return new CreateFolderModal(
     Obsidian!.app,
-    args.onFinish as (name: string, emoji: string) => void
+    args.onFinish as (name: string, emoji: string) => void,
   );
 });
 

@@ -30,7 +30,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
 
   onDragStart(ev: DragEvent, attrs: Attr, key: number) {
     Bookmarks.dragged = {
-      pos: attrs.position
+      pos: attrs.position,
     };
 
     ev.dataTransfer!.setData(
@@ -39,8 +39,8 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
         crd: key,
         name: attrs.name,
         emojicon: attrs.emojicon,
-        path: attrs.path
-      })
+        path: attrs.path,
+      }),
     );
 
     this.isDragStarted = true;
@@ -61,7 +61,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
   handleContextMenu(ev: MouseEvent, attr: Attr) {
     const menu = new Menu();
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Edit...")
         .setIcon("pen-line")
@@ -70,12 +70,12 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
             attr.name,
             attr.emojicon,
             attr.position,
-            attr.path
+            attr.path,
           );
-        })
+        }),
     );
 
-    menu.addItem(item =>
+    menu.addItem((item) =>
       item
         .setTitle("Delete")
         .setIcon("trash")
@@ -85,7 +85,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
           Bookmarks.save();
 
           m.redraw();
-        })
+        }),
     );
 
     menu.showAtMouseEvent(ev);
@@ -111,7 +111,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
           attr.name,
           attr.emojicon,
           attr.position,
-          path
+          path,
         );
         break;
       }
@@ -178,7 +178,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
           <Space
             crd={vnode.key}
             position={vnode.attrs.position.map((val, index) =>
-              index == vnode.attrs.position.length - 1 ? val + 1 : val
+              index == vnode.attrs.position.length - 1 ? val + 1 : val,
             )}
             noHighlight={this.isDragStarted}
             nest={vnode.attrs.nest}
