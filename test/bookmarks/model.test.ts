@@ -1,7 +1,8 @@
 import { describe, test, before, beforeEach } from "node:test";
 import assert from "node:assert";
 import { BookmarksBaseModel } from "rover/view/models/BookmarksModel";
-import { RoverBookmark } from "rover/view/models/app/core";
+import { RoverBookmark } from "rover/core";
+import { log } from "rover/utils";
 
 const item = (name: string, path?: string, children?: RoverBookmark[]) => ({
   name,
@@ -15,7 +16,7 @@ describe("Bookmarks Model", () => {
   let Bookmarks: BookmarksBaseModel;
 
   before(() => {
-    Bookmarks = new BookmarksBaseModel({} as any, (t, args) => console.log(t));
+    Bookmarks = new BookmarksBaseModel({} as any, (t, args) => log(t));
   });
 
   describe("move", () => {

@@ -1,11 +1,12 @@
 import m from "mithril";
 import { File } from "./File";
 
-import { RoverFile } from "rover/view/models/app/core";
-import { Obsidian } from "rover/view/models/app";
+import { RoverFile } from "rover/core";
+import { Obsidian } from "rover/view/models/Obsidian";
 import { Explorer } from "rover/view/models";
 
 import { Menu } from "obsidian";
+import { log } from "rover/utils";
 
 interface Attr {
   name: string;
@@ -65,14 +66,12 @@ export class Folder implements m.ClassComponent<Attr> {
     if (this.nested.length) {
       this.nested = await Explorer.getFiles(path);
     }
-    console.log(
-      `FOLDER ${path} ${performance.now()}: nested create delete and redraw`,
-    );
+    log(`FOLDER ${path} ${performance.now()}: nested create delete and redraw`);
     complete();
   }
 
   handleDragEnterExit(attr: Attr) {
-    console.log(`FOLDER ${attr.path} drag enter/exit: ${!this.isDragEntered}`);
+    log(`FOLDER ${attr.path} drag enter/exit: ${!this.isDragEntered}`);
     if (!this.isDragEntered) {
       this.timeoutId = setTimeout(() => this.reveal(attr.path), 1500);
     } else {
@@ -86,7 +85,7 @@ export class Folder implements m.ClassComponent<Attr> {
 
   onupdate(vnode: m.VnodeDOM<Attr, this>) {
     if (vnode.attrs.path != this.capturedPath && this.nested.length) {
-      console.log(`New path: ${vnode.attrs.path} vs ${this.capturedPath}`);
+      log(`New path: ${vnode.attrs.path} vs ${this.capturedPath}`);
 
       Explorer.getFiles(vnode.attrs.path).then((files) => {
         this.nested = files;

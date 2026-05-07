@@ -3,7 +3,7 @@ import { test, describe, before, after } from "node:test";
 import assert from "node:assert";
 import { ListBookmarks } from "rover/view/components/Bookmarks/ListBookmarks";
 import { JSDOM } from "jsdom";
-import { RoverBookmark } from "rover/view/models/app/core";
+import { RoverBookmark } from "rover/core.js";
 import { Bookmarks } from "rover/view/models";
 
 const item = (

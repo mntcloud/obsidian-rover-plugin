@@ -8,8 +8,8 @@ import {
 import { RoverSidebarView, VIEW_TYPE } from "rover/view/RoverSidebarView";
 
 import * as utils from "./utils";
-import { init, Obsidian } from "rover/view/models/app";
-import { RoverPluginSettings } from "rover/view/models/app/core";
+import { init, Obsidian } from "rover/view/models/Obsidian";
+import { RoverPluginSettings } from "rover/core";
 import { Recents, Bookmarks } from "rover/view/models";
 
 const DEFAULT_SETTINGS: RoverPluginSettings = {

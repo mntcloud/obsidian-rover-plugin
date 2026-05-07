@@ -1,29 +1,13 @@
 import { ModifyItemModal } from "rover/modals/bookmarks/ModifyItem";
-import { RoverBookmark } from "./app/core";
-import type { ObsidianAppModel } from "./app/core";
+import { RoverBookmark } from "../../core";
+import type { ObsidianAppModel } from "../../core";
 
 import m from "mithril";
 
-import * as utils from "rover/utils";
+import { logError, log } from "rover/utils";
 import { CreateFolderModal } from "rover/modals/bookmarks/CreateFolder";
 import { CreateItemModal } from "rover/modals/bookmarks/CreateItem";
 import { EventRef } from "obsidian";
-
-interface AvailableModals {
-  modifyItem: {
-    name: string;
-    emoji: string;
-    path?: string;
-    onFinish: (name: string, emoji: string, path?: string) => void;
-  };
-  createItem: {
-    path: string;
-    onFinish: (name: string, emoji: string, path: string) => void;
-  };
-  createFolder: {
-    onFinish: (name: string, emoji: string) => void;
-  };
-}
 
 export class BookmarksBaseModel {
   evrefs: EventRef[] = [];
@@ -38,13 +22,7 @@ export class BookmarksBaseModel {
       }
     | undefined = undefined;
 
-  constructor(
-    private obsidian: ObsidianAppModel | undefined,
-    private openModal: <Key extends keyof AvailableModals>(
-      type: Key,
-      args: AvailableModals[Key],
-    ) => void,
-  ) {}
+  constructor(private obsidian: ObsidianAppModel | undefined) {}
 
   listenToVault() {
     this.evrefs = [
@@ -66,42 +44,84 @@ export class BookmarksBaseModel {
     }
   }
 
-  openCreateItem(pos: number[], path: string) {
-    this.openModal("createItem", {
-      path,
-      onFinish: (name, emoji, path) => {
-        const seq = this.follow(pos);
-
-        seq.splice(pos[pos.length - 1], 0, {
-          crd: Date.now(),
-          name: name,
-          emojicon: emoji,
-          path: path,
-        });
-
-        this.save();
-
-        m.redraw();
-      },
-    });
-  }
-
-  openCreateFolderModal(firstItem: number[], secondItem: number[]) {
+  // We need to combine somehow key and value from Modals,
+  // other ways just doesn't narrow to one object-value assigned to one key
+  openModal(
+    ...[name, params]:
+      | [
+          "createItem",
+          {
+            pos: number[];
+            path: string;
+          },
+        ]
+      | [
+          "createFolder",
+          {
+            firstItem: number[];
+            secondItem: number[];
+          },
+        ]
+      | [
+          "modifyItem",
+          {
+            pos: number[];
+            name: string;
+            emoji: string;
+            path?: string;
+          },
+        ]
+  ) {
     if (!this.obsidian) {
-      console.error("ROVER: no instance of obsidian");
+      logError("ROVER: no instance of obsidian");
       return;
     }
 
-    this.openModal("createFolder", {
-      onFinish: (name, emoji) => {
-        this.createFolder(name, emoji, firstItem, secondItem);
+    switch (name) {
+      case "modifyItem": {
+        return new ModifyItemModal(
+          this.obsidian!.app,
+          params!.name,
+          params.emoji,
+          (newName, newEmoji, path) => {
+            this.update(newName, newEmoji, params.pos, path);
+            this.save();
+            m.redraw();
+          },
+          params.path,
+        ).open();
+      }
+      case "createItem": {
+        return new CreateItemModal(
+          this.obsidian!.app,
+          params.path!,
+          (name, emoji, path) => {
+            const seq = this.follow(params.pos);
 
-        this.save();
-        this.dragged = undefined;
+            seq.splice(params.pos[params.pos.length - 1], 0, {
+              crd: Date.now(),
+              name: name,
+              emojicon: emoji,
+              path: path,
+            });
 
-        m.redraw();
-      },
-    });
+            this.save();
+
+            m.redraw();
+          },
+        ).open();
+      }
+      case "createFolder": {
+        return new CreateFolderModal(this.obsidian!.app, (name, emoji) => {
+          this.createFolder(name, emoji, params.firstItem, params.secondItem);
+
+          this.save();
+          this.dragged = undefined;
+
+          m.redraw();
+        }).open();
+      }
+    }
   }
 
   // TODO: rewrite this using new techniques from move function
@@ -127,32 +147,10 @@ export class BookmarksBaseModel {
     };
   }
 
-  openModifyItemModal(
-    name: string,
-    emoji: string,
-    pos: number[],
-    path?: string,
-  ) {
-    if (!this.obsidian) {
-      return;
-    }
-
-    this.openModal("modifyItem", {
-      name,
-      emoji,
-      path,
-      onFinish: (newName, newEmoji, path) => {
-        this.update(newName, newEmoji, pos, path);
-        this.save();
-        m.redraw();
-      },
-    });
-  }
-
   update(name: string, emojicon: string, pos: number[], path?: string) {
     const item = this.follow(pos)[pos[pos.length - 1]];
 
-    console.log(item, pos, this.follow(pos));
+    log(item, pos, this.follow(pos));
 
     item.name = name;
     item.emojicon = emojicon;
@@ -164,7 +162,7 @@ export class BookmarksBaseModel {
 
   save() {
     if (!this.obsidian) {
-      utils.error("obsidian: uninitialized");
+      logError("obsidian: uninitialized");
       return;
     }
 
@@ -196,6 +194,17 @@ export class BookmarksBaseModel {
     }
   }
 
+  /**
+   * What follow exactly returns on position, for example, [0, 0, 0], illustrated
+   * ```
+   * Root
+   * └── Bookmark Folder (0)
+   *     └── Nested Folder (0) (`follow` returns it's children)
+   *          ├── Item1 (0) (but position points to this item)
+   *          ├── Item2 (1)
+   *          └── Item3 (2)
+   * ```
+   */
   // TODO: check for children field and if it doesn't exist, print an error in console
   follow(position: number[]) {
     let current = this.items;
@@ -232,15 +241,15 @@ export class BookmarksBaseModel {
     return null;
   }
 
-  move(to: number[], item: RoverBookmark) {
-    const seq = this.follow(to);
+  move(position: number[], item: RoverBookmark) {
+    const seq = this.follow(position);
     const oldLength = seq.length;
 
     this.delete(this.dragged!.pos);
 
     // check if op above modifies the sequence
     if (oldLength > seq.length) {
-      const destination = to[to.length - 1];
+      const destination = position[position.length - 1];
 
       if (this.dragged!.pos[this.dragged!.pos.length - 1] > destination) {
         seq.splice(destination, 0, item);
@@ -248,7 +257,7 @@ export class BookmarksBaseModel {
         seq.splice(destination - 1, 0, item);
       }
     } else {
-      seq.splice(to[to.length - 1], 0, item);
+      seq.splice(position[position.length - 1], 0, item);
     }
   }
 
@@ -257,7 +266,7 @@ export class BookmarksBaseModel {
 
     const target = current[position[position.length - 1]];
 
-    // well, nodejs (our testing env) doesn't have remove function
+    // well, nodejs (our testing env) doesn't have a remove function
     current.splice(position[position.length - 1], 1);
 
     return target;

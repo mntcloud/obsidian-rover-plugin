@@ -1,7 +1,7 @@
 import m from "mithril";
 import { BookmarkFolder } from "./BookmarkFolder";
 import { BookmarkItem } from "./BookmarkItem";
-import { RoverBookmark } from "rover/view/models/app/core";
+import { RoverBookmark } from "rover/core";
 
 interface Attr {
   inheritedPosition: number[];

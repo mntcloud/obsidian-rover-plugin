@@ -1,7 +1,7 @@
 import m from "mithril";
-import * as utils from "rover/utils";
+import { logError } from "rover/utils";
 import { Bookmarks } from "rover/view/models";
-import { RoverBookmark } from "rover/view/models/app/core";
+import { RoverBookmark } from "rover/core";
 
 interface Attr {
   position: number[];
@@ -28,7 +28,7 @@ export class Space implements m.ClassComponent<Attr> {
 
   onDrop(ev: DragEvent, attr: Attr) {
     if (!ev.dataTransfer) {
-      utils.error("Data transfer: undefined");
+      logError("Data transfer: undefined");
       return;
     }
 
@@ -45,7 +45,7 @@ export class Space implements m.ClassComponent<Attr> {
     if (ev.dataTransfer.types.includes("application/rover.file")) {
       const path = ev.dataTransfer.getData("application/rover.file");
 
-      Bookmarks.openCreateItem(attr.position, path);
+      Bookmarks.openModal("createItem", { pos: attr.position, path });
     }
   }
 

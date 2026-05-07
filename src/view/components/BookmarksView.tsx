@@ -1,9 +1,9 @@
 import m from "mithril";
 
 import { CreateItemModal } from "../../modals/bookmarks/CreateItem";
-import { RoverBookmark } from "rover/view/models/app/core";
+import { RoverBookmark } from "rover/core";
 import { Bookmarks } from "rover/view/models";
-import { Obsidian } from "rover/view/models/app";
+import { Obsidian } from "rover/view/models/Obsidian";
 import { ListBookmarks } from "./Bookmarks/ListBookmarks";
 
 interface Attr {

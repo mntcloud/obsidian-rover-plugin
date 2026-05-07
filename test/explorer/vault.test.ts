@@ -3,6 +3,7 @@ import assert from "node:assert";
 import { ExplorerBaseModel } from "rover/view/models/ExplorerModel";
 import { RecentsBaseModel } from "rover/view/models/RecentsModel";
 import { Stat } from "obsidian";
+import { log } from "rover/utils";
 
 // jest.mock("view/models/data/Obsidian");
 
@@ -58,7 +59,7 @@ describe("Vault Listeners", () => {
 
     mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
-        console.log(`STAT: ${path}`);
+        log(`STAT: ${path}`);
 
         return null;
       },

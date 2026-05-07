@@ -1,7 +1,7 @@
 import m from "mithril";
 
 import { ListBookmarks } from "./ListBookmarks";
-import { RoverBookmark } from "rover/view/models/app/core";
+import { RoverBookmark } from "rover/core";
 import { Bookmarks } from "rover/view/models";
 import { Space } from "./Space";
 import { Menu } from "obsidian";
@@ -49,11 +49,11 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
         .setTitle("Edit...")
         .setIcon("pen-line")
         .onClick(() => {
-          Bookmarks.openModifyItemModal(
-            attr.name,
-            attr.emojicon,
-            attr.position,
-          );
+          Bookmarks.openModal("modifyItem", {
+            name: attr.name,
+            emoji: attr.emojicon,
+            pos: attr.position,
+          });
         }),
     );
 

@@ -4,10 +4,11 @@ import m from "mithril";
 
 import { File } from "./FileManager/File";
 import { Folder } from "./FileManager/Folder";
-import { RoverFile } from "rover/view/models/app/core";
-import { Obsidian } from "rover/view/models/app";
+import { RoverFile } from "rover/core";
+import { Obsidian } from "rover/view/models/Obsidian";
 import { Explorer } from "rover/view/models";
 import { Menu, TAbstractFile } from "obsidian";
+import { log } from "rover/utils";
 
 export class ExplorerView implements m.ClassComponent {
   root!: RoverFile[];
@@ -22,14 +23,23 @@ export class ExplorerView implements m.ClassComponent {
 
   oninit(vnode: m.Vnode<{}, this>) {
     this.root = [];
-    this.structureUpdate().then(() => m.redraw());
+    this.rootUpdate().then(() => m.redraw());
+  }
+
+  oncreate(vnode: m.VnodeDOM<{}, this>) {
+    this.dom = vnode.dom;
+    Explorer.listenToVault(this.onVaultUpdate.bind(this));
+  }
+
+  onremove(vnode: m.VnodeDOM<{}, this>) {
+    Explorer.unlistenToVault();
   }
 
   async onVaultUpdate(isRoot: boolean, path?: string) {
     if (isRoot && !path) {
-      await this.structureUpdate();
+      await this.rootUpdate();
 
-      console.log(`ROOT UPDATE: ${performance.now()}`);
+      log(`ROOT UPDATE: ${performance.now()}`);
     } else {
       const element = this.dom.querySelector(`div[data-path="${path}"]`);
 
@@ -44,6 +54,25 @@ export class ExplorerView implements m.ClassComponent {
         });
       }
     }
+  }
+
+  async rootUpdate() {
+    const files = [];
+    const workspaceRoot = Obsidian!.vault.getRoot();
+
+    for (const item of workspaceRoot.children) {
+      const stat = await Obsidian!.vault.adapter.stat(item.path);
+
+      files.push({
+        mtime: stat!.ctime,
+        name: stat!.type != "folder" ? basename(item.name, ".md") : item.name,
+        path: item.path,
+        isFolder: stat!.type == "folder",
+      });
+    }
+
+    files.sort(Explorer.comparator);
+    this.root = files;
   }
 
   onDragEnterExit() {
@@ -132,34 +161,6 @@ export class ExplorerView implements m.ClassComponent {
     );
 
     menu.showAtMouseEvent(ev);
-  }
-
-  oncreate(vnode: m.VnodeDOM<{}, this>) {
-    this.dom = vnode.dom;
-    Explorer.listenToVault(this.onVaultUpdate.bind(this));
-  }
-
-  onremove(vnode: m.VnodeDOM<{}, this>) {
-    Explorer.unlistenToVault();
-  }
-
-  async structureUpdate() {
-    const newRoot = [];
-    const workspaceRoot = Obsidian!.vault.getRoot();
-
-    for (const item of workspaceRoot.children) {
-      const stat = await Obsidian!.vault.adapter.stat(item.path);
-
-      newRoot.push({
-        mtime: stat!.ctime,
-        name: stat!.type != "folder" ? basename(item.name, ".md") : item.name,
-        path: item.path,
-        isFolder: stat!.type == "folder",
-      });
-    }
-
-    newRoot.sort(Explorer.comparator);
-    this.root = newRoot;
   }
 
   view() {

@@ -1,5 +1,5 @@
 import { App } from "obsidian";
-import { RoverPluginSettings, ObsidianAppModel } from "./core";
+import { RoverPluginSettings, ObsidianAppModel } from "../../core";
 
 export function init(
   app: App,

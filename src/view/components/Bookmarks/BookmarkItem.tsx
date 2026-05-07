@@ -1,5 +1,5 @@
 import m from "mithril";
-import * as utils from "rover/utils";
+import { log, logError } from "rover/utils";
 import { Space } from "./Space";
 
 import { Bookmarks, Explorer } from "rover/view/models";
@@ -47,7 +47,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
   }
 
   onDragEnd() {
-    console.log(`DRAGEND, checkpoint`);
+    log(`DRAGEND, checkpoint`);
     if (Bookmarks.dragged) {
       Bookmarks.dragged = undefined;
     }
@@ -66,12 +66,12 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
         .setTitle("Edit...")
         .setIcon("pen-line")
         .onClick(() => {
-          Bookmarks.openModifyItemModal(
-            attr.name,
-            attr.emojicon,
-            attr.position,
-            attr.path,
-          );
+          Bookmarks.openModal("modifyItem", {
+            name: attr.name,
+            emoji: attr.emojicon,
+            pos: attr.position,
+            path: attr.path,
+          });
         }),
     );
 
@@ -92,27 +92,30 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
   }
 
   onDrop(ev: DragEvent, attr: Attr) {
-    console.log(`DROP, checkpoint`);
+    log(`DROP, checkpoint`);
 
     if (!ev.dataTransfer) {
-      utils.error("BOOKMARK_ITEM: data transfer is undefined...");
+      logError("BOOKMARK_ITEM: data transfer is undefined...");
       return;
     }
 
     switch (true) {
       case ev.dataTransfer.types.includes("application/rover.bookmark"): {
-        Bookmarks.openCreateFolderModal(Bookmarks.dragged!.pos, attr.position);
+        Bookmarks.openModal("createFolder", {
+          firstItem: Bookmarks.dragged!.pos,
+          secondItem: attr.position,
+        });
         break;
       }
       case ev.dataTransfer.types.includes("application/rover.file"): {
         const path = ev.dataTransfer.getData("application/rover.file");
 
-        Bookmarks.openModifyItemModal(
-          attr.name,
-          attr.emojicon,
-          attr.position,
-          path,
-        );
+        Bookmarks.openModal("modifyItem", {
+          name: attr.name,
+          emoji: attr.emojicon,
+          pos: attr.position,
+          path: path,
+        });
         break;
       }
       default:

@@ -1,4 +1,4 @@
-import type { ObsidianAppModel } from "./app/core";
+import type { ObsidianAppModel } from "../../core";
 
 export class RecentsBaseModel {
   pendingNewFolderPath?: string;
@@ -9,7 +9,7 @@ export class RecentsBaseModel {
 
   constructor(private obsidian: ObsidianAppModel | undefined) {}
 
-  updateRecents(): void {
+  update(): void {
     if (!this.obsidian) {
       console.error("ROVER: app instance is unintialized");
       return;
@@ -23,10 +23,10 @@ export class RecentsBaseModel {
 
     this.list = this.list.filter((path) => path != this.active);
 
-    this.saveRecents();
+    this.save();
   }
 
-  saveRecents() {
+  save() {
     if (!this.obsidian) {
       console.error("ROVER: Obsidian API is not available");
       return;

@@ -1,10 +1,11 @@
 import m from "mithril";
 
 import { basename, dirname } from "node:path";
-import { RoverFile } from "./app/core";
-import type { ObsidianAppModel } from "./app/core";
+import { RoverFile } from "../../core";
+import type { ObsidianAppModel } from "../../core";
 import { RecentsBaseModel } from "./RecentsModel";
 import { EventRef } from "obsidian";
+import { log } from "rover/utils";
 
 export class ExplorerBaseModel {
   isBeingTested = false;
@@ -149,7 +150,7 @@ export class ExplorerBaseModel {
     const file = this.obsidian.vault.getFileByPath(path);
 
     if (file) {
-      this.recentsModel.updateRecents();
+      this.recentsModel.update();
       await leaf.openFile(file);
     }
   }
@@ -163,7 +164,7 @@ export class ExplorerBaseModel {
         `${destination}/${file.name}`,
       );
     } else {
-      console.log("SAME!");
+      log("SAME!");
     }
   }
 
@@ -176,7 +177,7 @@ export class ExplorerBaseModel {
         `${destination}/${file.name}`,
       );
     } else {
-      console.log("SAME!");
+      log("SAME!");
     }
   }
 

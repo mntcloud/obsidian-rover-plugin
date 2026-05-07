@@ -2,7 +2,7 @@ import m from "mithril";
 
 import { Menu } from "obsidian";
 import { Bookmarks, Explorer } from "rover/view/models";
-import { Obsidian } from "rover/view/models/app";
+import { Obsidian } from "rover/view/models/Obsidian";
 
 interface Attr {
   name: string;

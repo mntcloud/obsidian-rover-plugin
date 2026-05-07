@@ -4,7 +4,7 @@ import m from "mithril";
 import { EventRef } from "obsidian";
 
 import { Bookmarks, Explorer, Recents } from "rover/view/models";
-import { Obsidian } from "rover/view/models/app";
+import { Obsidian } from "rover/view/models/Obsidian";
 
 export class RecentsView implements m.ClassComponent {
   vaultEvRef!: EventRef[];
@@ -26,7 +26,7 @@ export class RecentsView implements m.ClassComponent {
     this.vaultEvRef = [
       Obsidian!.vault.on("delete", (file) => {
         Recents.list = Recents.list.filter((path) => path != file.path);
-        Recents.saveRecents();
+        Recents.save();
       }),
       Obsidian!.vault.on("rename", async (file, oldPath) => {
         if (file.path == Obsidian!.workspace.getActiveFile()?.path) {
@@ -37,18 +37,18 @@ export class RecentsView implements m.ClassComponent {
 
           if (index > -1) {
             Recents.list[index] = file.path;
-            Recents.saveRecents();
+            Recents.save();
           }
         }
       }),
     ];
 
     this.workspaceEvRef = Obsidian!.workspace.on("file-open", () => {
-      Recents.updateRecents();
+      Recents.update();
       m.redraw();
     });
 
-    Recents.updateRecents();
+    Recents.update();
 
     m.redraw();
   }
