@@ -16,7 +16,7 @@ describe("Bookmarks Model", () => {
   let Bookmarks: BookmarksBaseModel;
 
   before(() => {
-    Bookmarks = new BookmarksBaseModel({} as any, (t, args) => log(t));
+    Bookmarks = new BookmarksBaseModel({} as any);
   });
 
   describe("move", () => {

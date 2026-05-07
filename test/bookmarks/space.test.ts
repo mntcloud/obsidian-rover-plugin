@@ -44,7 +44,7 @@ describe("DOM: pointing out a free space, when user is moving a grabbed bookmark
     globalThis.document = dom.window.document;
     globalThis.requestAnimationFrame = dom.window.requestAnimationFrame;
 
-    // @ts-expect-error "import of file with side-effects"
+    // @ts-expect-error "import polyfills"
     await import("./dragevent.polyfill.js");
 
     document.body.innerHTML = `<div id="root"></div>`;

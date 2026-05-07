@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-  "paths": {
-  "rover/*": ["./src/*"]
-  },
-  "inlineSources": true,
+    "paths": {
+      "rover/*": ["./src/*"],
+    },
+    "inlineSources": true,
     "module": "ESNext",
     "target": "ES6",
-    "allowJs": true,
+    "allowJs": false,
     "noImplicitAny": true,
     "types": ["node", "mithril", "obsidian"],
     "importHelpers": true,
@@ -17,14 +17,7 @@
     "isolatedModules": true,
     "esModuleInterop": true,
     "strictNullChecks": true,
-    "lib": [
-      "DOM",
-      "ES5",
-      "ES6",
-      "ES7"
-    ]
+    "lib": ["DOM", "ES5", "ES6", "ES7"],
   },
-  "include": [
-    "**/*.ts"
-  ]
+  "include": ["**/*.ts"],
 }
