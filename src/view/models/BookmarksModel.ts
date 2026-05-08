@@ -8,7 +8,6 @@ import { logError, log } from "rover/utils";
 import { CreateFolderModal } from "rover/modals/bookmarks/CreateFolder";
 import { CreateItemModal } from "rover/modals/bookmarks/CreateItem";
 import { EventRef } from "obsidian";
-import { time } from "console";
 
 export class BookmarksBaseModel {
   evrefs: EventRef[] = [];
@@ -163,8 +162,7 @@ export class BookmarksBaseModel {
 
     if (
       oldLength > currentTree.length &&
-      currentTree[drop.position[dropIndex] - 1] &&
-      currentTree[drop.position[dropIndex] - 1].crd == drop.item.crd
+      currentTree[drop.position[dropIndex] - 1]?.crd == drop.item.crd
     ) {
       currentTree[drop.position[dropIndex] - 1] = folder;
     } else {
@@ -227,7 +225,7 @@ export class BookmarksBaseModel {
   }
 
   /**
-   * What follow exactly returns on position, for example, [0, 0, 0], illustrated
+   * What follow returns on position, for example, [0, 0, 0], illustrated
    * ```
    * Root
    * └── Bookmark Folder (0)
