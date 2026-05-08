@@ -8,6 +8,7 @@ import { logError, log } from "rover/utils";
 import { CreateFolderModal } from "rover/modals/bookmarks/CreateFolder";
 import { CreateItemModal } from "rover/modals/bookmarks/CreateItem";
 import { EventRef } from "obsidian";
+import { time } from "console";
 
 export class BookmarksBaseModel {
   evrefs: EventRef[] = [];
@@ -16,6 +17,8 @@ export class BookmarksBaseModel {
   isTesting = false;
   isFileDragStarted = false;
 
+  // We need to keep somehow a global state
+  // for whole Bookmarks components to show free space when item is dragged.
   dragged:
     | {
         pos: number[];
@@ -27,7 +30,7 @@ export class BookmarksBaseModel {
   listenToVault() {
     this.evrefs = [
       this.obsidian!.vault.on("rename", (file, old) => {
-        const item = this.find(old);
+        const item = this.findByPath(old);
 
         if (item) {
           item.path = file.path;
@@ -58,8 +61,14 @@ export class BookmarksBaseModel {
       | [
           "createFolder",
           {
-            firstItem: number[];
-            secondItem: number[];
+            firstItem: {
+              position: number[];
+              item: RoverBookmark;
+            };
+            secondItem: {
+              position: number[];
+              item: RoverBookmark;
+            };
           },
         ]
       | [
@@ -124,27 +133,43 @@ export class BookmarksBaseModel {
     }
   }
 
-  // TODO: rewrite this using new techniques from move function
   createFolder(
     name: string,
     emojicon: string,
-    dragged: number[],
-    drop: number[],
+    dragged: {
+      position: number[];
+      item: RoverBookmark;
+    },
+    drop: {
+      position: number[];
+      item: RoverBookmark;
+    },
+    timestamp = Date.now(),
   ) {
-    const currentTree = this.follow(drop);
-    const currentBookmark = Object.assign({}, currentTree[drop[0]]); // clone
+    const currentTree = this.follow(drop.position);
+    const oldLength = currentTree.length;
 
-    const draggedBookmark = this.delete(dragged);
-    this.updatePositions(dragged, drop);
+    this.delete(dragged.position);
 
-    currentTree[drop[0]] = {
+    const folder = {
       name: name,
       emojicon: emojicon,
-      crd: Date.now(),
+      crd: timestamp,
       path: undefined,
-
-      children: [currentBookmark, draggedBookmark],
+      children: [drop.item, dragged.item],
     };
+
+    const dropIndex = drop.position.length - 1;
+
+    if (
+      oldLength > currentTree.length &&
+      currentTree[drop.position[dropIndex] - 1] &&
+      currentTree[drop.position[dropIndex] - 1].crd == drop.item.crd
+    ) {
+      currentTree[drop.position[dropIndex] - 1] = folder;
+    } else {
+      currentTree[drop.position[dropIndex]] = folder;
+    }
   }
 
   update(name: string, emojicon: string, pos: number[], path?: string) {
@@ -160,6 +185,37 @@ export class BookmarksBaseModel {
     }
   }
 
+  move(target: number[], item: RoverBookmark) {
+    const seq = this.follow(target);
+    const oldLength = seq.length;
+
+    this.delete(this.dragged!.pos);
+
+    // check if op above modifies the sequence
+    if (oldLength > seq.length) {
+      const destination = target[target.length - 1];
+
+      if (this.dragged!.pos[this.dragged!.pos.length - 1] > destination) {
+        seq.splice(destination, 0, item);
+      } else {
+        seq.splice(destination - 1, 0, item);
+      }
+    } else {
+      seq.splice(target[target.length - 1], 0, item);
+    }
+  }
+
+  delete(position: number[]) {
+    const current = this.follow(position);
+
+    const target = current[position[position.length - 1]];
+
+    // well, nodejs (our testing env) doesn't have a remove function
+    current.splice(position[position.length - 1], 1);
+
+    return target;
+  }
+
   save() {
     if (!this.obsidian) {
       logError("obsidian: uninitialized");
@@ -168,30 +224,6 @@ export class BookmarksBaseModel {
 
     this.obsidian.settings.bookmarks = this.items;
     this.obsidian.save();
-  }
-
-  updatePositions(example: number[], target: number[]) {
-    if (example.length > target.length) {
-      return; // changes did nothing to target positions
-    }
-
-    let i = example.length - 1,
-      j = target.length - 1;
-
-    while (i >= 0) {
-      if (i == 0) {
-        if (example[i] < target[j]) {
-          target[j]--;
-        }
-      }
-
-      if (example[i] != target[j]) {
-        break;
-      }
-
-      i--;
-      j--;
-    }
   }
 
   /**
@@ -210,7 +242,6 @@ export class BookmarksBaseModel {
     let current = this.items;
     let positionIndex = 0;
 
-    // NOTE: code was written to go from the end of the array
     while (positionIndex != position.length - 1) {
       current = current[position[positionIndex]].children!;
 
@@ -220,13 +251,13 @@ export class BookmarksBaseModel {
     return current;
   }
 
-  find(
+  findByPath(
     path: string,
     items: RoverBookmark[] = this.items,
   ): RoverBookmark | null {
     for (const item of items) {
       if (item.children) {
-        const res = this.find(path, item.children);
+        const res = this.findByPath(path, item.children);
 
         if (res) {
           return res;
@@ -239,36 +270,5 @@ export class BookmarksBaseModel {
     }
 
     return null;
-  }
-
-  move(position: number[], item: RoverBookmark) {
-    const seq = this.follow(position);
-    const oldLength = seq.length;
-
-    this.delete(this.dragged!.pos);
-
-    // check if op above modifies the sequence
-    if (oldLength > seq.length) {
-      const destination = position[position.length - 1];
-
-      if (this.dragged!.pos[this.dragged!.pos.length - 1] > destination) {
-        seq.splice(destination, 0, item);
-      } else {
-        seq.splice(destination - 1, 0, item);
-      }
-    } else {
-      seq.splice(position[position.length - 1], 0, item);
-    }
-  }
-
-  delete(position: number[]) {
-    const current = this.follow(position);
-
-    const target = current[position[position.length - 1]];
-
-    // well, nodejs (our testing env) doesn't have a remove function
-    current.splice(position[position.length - 1], 1);
-
-    return target;
   }
 }

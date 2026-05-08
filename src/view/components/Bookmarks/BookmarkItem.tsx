@@ -4,6 +4,7 @@ import { Space } from "./Space";
 
 import { Bookmarks, Explorer } from "rover/view/models";
 import { Menu } from "obsidian";
+import { RoverBookmark } from "rover/core";
 
 interface Attr {
   position: number[];
@@ -91,7 +92,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
     menu.showAtMouseEvent(ev);
   }
 
-  onDrop(ev: DragEvent, attr: Attr) {
+  onDrop(ev: DragEvent, attr: Attr, key: number) {
     log(`DROP, checkpoint`);
 
     if (!ev.dataTransfer) {
@@ -101,9 +102,24 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
 
     switch (true) {
       case ev.dataTransfer.types.includes("application/rover.bookmark"): {
+        const item = JSON.parse(
+          ev.dataTransfer.getData("application/rover.bookmark"),
+        ) as RoverBookmark;
+
         Bookmarks.openModal("createFolder", {
-          firstItem: Bookmarks.dragged!.pos,
-          secondItem: attr.position,
+          firstItem: {
+            position: Bookmarks.dragged!.pos,
+            item: item,
+          },
+          secondItem: {
+            position: attr.position,
+            item: {
+              crd: key,
+              name: attr.name,
+              emojicon: attr.emojicon,
+              path: attr.path,
+            },
+          },
         });
         break;
       }
@@ -159,7 +175,8 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
           ondragend={() => this.onDragEnd()}
           ondrop={
             !this.isDragStarted
-              ? (ev: DragEvent) => this.onDrop(ev, vnode.attrs)
+              ? (ev: DragEvent) =>
+                  this.onDrop(ev, vnode.attrs, vnode.key as number)
               : undefined
           }
           ondragover={

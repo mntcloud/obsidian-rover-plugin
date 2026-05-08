@@ -4,9 +4,14 @@ import { BookmarksBaseModel } from "rover/view/models/BookmarksModel";
 import { RoverBookmark } from "rover/core";
 import { log } from "rover/utils";
 
-const item = (name: string, path?: string, children?: RoverBookmark[]) => ({
+const item = (
+  name: string,
+  path?: string,
+  children?: RoverBookmark[],
+  crd: number = 0,
+) => ({
   name,
-  crd: 0,
+  crd,
   emojicon: "🫠",
   path,
   children,
@@ -250,8 +255,8 @@ describe("Bookmarks Model", () => {
     test("finds item by path at root", () => {
       Bookmarks.items = [item("A", "A.md"), item("B", "B.md")];
 
-      assert.deepStrictEqual(Bookmarks.find("A.md"), item("A", "A.md"));
-      assert.deepStrictEqual(Bookmarks.find("B.md"), item("B", "B.md"));
+      assert.deepStrictEqual(Bookmarks.findByPath("A.md"), item("A", "A.md"));
+      assert.deepStrictEqual(Bookmarks.findByPath("B.md"), item("B", "B.md"));
     });
 
     test("finds item by path in nested children", () => {
@@ -261,8 +266,8 @@ describe("Bookmarks Model", () => {
           item("C", undefined, [item("D", "D.md")]),
         ]),
       ];
-      assert.deepStrictEqual(Bookmarks.find("B.md"), item("B", "B.md"));
-      assert.deepStrictEqual(Bookmarks.find("D.md"), item("D", "D.md"));
+      assert.deepStrictEqual(Bookmarks.findByPath("B.md"), item("B", "B.md"));
+      assert.deepStrictEqual(Bookmarks.findByPath("D.md"), item("D", "D.md"));
     });
 
     test("returns null if path not found", () => {
@@ -270,7 +275,7 @@ describe("Bookmarks Model", () => {
         item("A", "A.md"),
         item("B", undefined, [item("C", "C.md")]),
       ];
-      assert.deepStrictEqual(Bookmarks.find("notfound.md"), null);
+      assert.deepStrictEqual(Bookmarks.findByPath("notfound.md"), null);
     });
 
     test("finds deeply nested item", () => {
@@ -282,9 +287,120 @@ describe("Bookmarks Model", () => {
         ]),
       ];
       assert.deepStrictEqual(
-        Bookmarks.find("target.md"),
+        Bookmarks.findByPath("target.md"),
         item("target", "target.md"),
       );
+    });
+  });
+
+  describe("create a folder from two items", () => {
+    test("in one item sequence", () => {
+      Bookmarks.items = [
+        item("B", "B.md", undefined, 0),
+        item("C", "C.md", undefined, 1),
+        item("D", "D.md", undefined, 2),
+      ];
+
+      Bookmarks.createFolder(
+        "E",
+        "🫠",
+        {
+          position: [1],
+          item: item("C", "C.md", undefined, 1),
+        },
+        {
+          position: [0],
+          item: item("B", "B.md", undefined, 0),
+        },
+        3,
+      );
+
+      assert.deepStrictEqual(Bookmarks.items, [
+        item(
+          "E",
+          undefined,
+          [item("B", "B.md", undefined, 0), item("C", "C.md", undefined, 1)],
+          3,
+        ),
+        item("D", "D.md", undefined, 2),
+      ]);
+    });
+
+    test("in one item sequence, dragged item was ahead its drop location ", () => {
+      Bookmarks.items = [
+        item("B", "B.md", undefined, 0),
+        item("C", "C.md", undefined, 1),
+        item("D", "D.md", undefined, 2),
+      ];
+
+      Bookmarks.createFolder(
+        "E",
+        "🫠",
+        {
+          // dragged item
+          position: [0],
+          item: item("B", "B.md", undefined, 0),
+        },
+        {
+          // drop
+          position: [1],
+          item: item("C", "C.md", undefined, 1),
+        },
+        3,
+      );
+
+      assert.deepStrictEqual(Bookmarks.items, [
+        item(
+          "E",
+          undefined,
+          [item("C", "C.md", undefined, 1), item("B", "B.md", undefined, 0)],
+          3,
+        ),
+        item("D", "D.md", undefined, 2),
+      ]);
+    });
+
+    test("from one item sequence to another", () => {
+      Bookmarks.items = [
+        item("B", "B.md", undefined, 0),
+        item("C", "C.md", undefined, 1),
+        item("D", "D.md", undefined, 2),
+        item(
+          "E",
+          undefined,
+          [item("F", "F.md", undefined, 4), item("G", "G.md", undefined, 5)],
+          3,
+        ),
+      ];
+
+      Bookmarks.createFolder(
+        "H",
+        "🫠",
+        {
+          // dragged item
+          position: [3, 0],
+          item: item("F", "F.md", undefined, 4),
+        },
+        {
+          // drop
+          position: [1],
+          item: item("C", "C.md", undefined, 1),
+        },
+        6,
+      );
+
+      assert.deepStrictEqual(Bookmarks.items, [
+        item("B", "B.md", undefined, 0),
+        item(
+          "H",
+          undefined,
+          [item("C", "C.md", undefined, 1), item("F", "F.md", undefined, 4)],
+          6,
+        ),
+
+        item("D", "D.md", undefined, 2),
+        item("E", undefined, [item("G", "G.md", undefined, 5)], 3),
+      ]);
     });
   });
 });
