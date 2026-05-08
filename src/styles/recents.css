@@ -1,0 +1,26 @@
+.rover-recents > .rover-file,
+.rover-recents-others > div {
+    color: var(--nav-item-color);
+    padding: 6px 12px;
+}
+
+.rover-recents {
+    max-width: 400px;
+}
+
+.rover-recents-others {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-height: 200px;
+    margin: 10px 0px;
+}
+
+.rover-recents-others > .rover-file {
+    max-width: 400px;
+}
+
+.rover-recents > div.active {
+    color: var(--color-base-100);
+    background-color: var(--background-primary);
+    border-radius: var(--radius-l);
+}

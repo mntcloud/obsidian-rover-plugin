@@ -1,0 +1,71 @@
+.rover-bookmark-item,
+.rover-bookmark-folder {
+    display: flex;
+    align-items: center;
+    flex: none;
+}
+
+.rover-bookmark-item {
+    padding: 2px 0px;
+
+    & > .rover-emojicon {
+        margin-right: 5px;
+    }
+}
+
+.rover-bookmark-folder-container {
+    padding: 2px 0px;
+}
+
+.rover-bookmark-folder {
+    & > .lucide-chevron-right {
+        margin-right: 2.5px;
+        transition: transform 0.1s ease-in-out;
+    }
+
+    &.open > .lucide-chevron-right {
+        transform: rotate(90deg);
+    }
+
+    & > span {
+        width: fit-content;
+    }
+}
+
+.rover-bookmarks-container {
+    display: flex;
+    flex-direction: column;
+
+    .rover-emojicon {
+        opacity: 0.75;
+        font-size: 16px;
+    }
+
+    .rover-space {
+        height: 6px;
+        border-radius: 10px;
+    }
+
+    .rover-space.active {
+        background-color: var(--color-base-30);
+    }
+
+    & > .drop-small-field {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 10px;
+        height: 65px;
+        border-radius: 10px;
+        border: var(--border-width) solid var(--color-base-30);
+    }
+
+    & > .drop-large-field {
+        color: var(--text-faint);
+    }
+
+    &:has(.drop-large-field) {
+        height: 75px;
+        justify-content: center;
+    }
+}

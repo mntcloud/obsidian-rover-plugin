@@ -1,0 +1,87 @@
+.rover-folder {
+    display: flex;
+    align-items: center;
+    color: var(--nav-folder-color);
+}
+
+.rover-folder > .lucide-folder {
+    margin-right: 5px;
+}
+
+.rover-file-manage .rover-file {
+    width: 160px;
+}
+
+.rover-file-manager {
+    overflow-y: scroll;
+    overflow-x: hidden;
+    flex: 0 auto;
+    height: 100%;
+    padding: 10px 0;
+    margin-bottom: unset;
+}
+.rover-file-manager .rover-folder-container,
+.rover-file-manager .rover-file {
+    padding: 5px 0;
+}
+
+.rover-file-manager.highlight {
+    background-color: var(--background-primary-alt);
+}
+
+.rover-folder-container > .rover-folder.expanded {
+    padding-bottom: 5px;
+}
+
+.rover-folder-container.hovered {
+    background-color: var(--background-primary-alt);
+}
+
+.rover-folder-container:has(.rover-folder.expanded) {
+    padding-bottom: unset;
+}
+
+.rover-file > input,
+.rover-folder > input,
+.rover-action-create > input {
+    font-family: var(--font-interface-theme);
+    font-weight: var(--nav-item-weight);
+    font-size: var(--nav-item-size);
+
+    background-color: var(--background-primary-alt);
+    outline: 0px;
+    border: 1px solid var(--background-modifier-border-focus);
+    border-radius: var(--radius-s);
+    padding: 2px 0px;
+    padding-left: 4px;
+    width: 140px;
+
+    color: var(--text-normal);
+}
+
+.rover-action-create {
+    width: fit-content;
+    height: 40px;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    border-radius: var(--radius-m);
+    background-color: var(--background-modifier-form-field);
+}
+
+.rover-action-create > input {
+    width: 140px;
+    margin-left: 5px;
+}
+
+.rover-action-create > button {
+    width: 25px;
+    height: 25px;
+    background-color: var(--color-base-25);
+    border: var(--border-width) solid var(--color-base-35);
+    padding: unset;
+}
+
+.rover-action-create > button .rover-lucide {
+    color: var(--icon-color-active);
+}

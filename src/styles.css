@@ -1,0 +1,26 @@
+@import "styles/filemanager.css";
+@import "styles/bookmarks.css";
+@import "styles/recents.css";
+
+.rover-container {
+    margin-top: 20px;
+    max-width: 400px;
+}
+
+.rover {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    padding: 0px var(--size-4-3) 0px var(--size-4-3);
+    font-size: var(--nav-item-size);
+    font-weight: var(--nav-item-weight);
+}
+
+.rover-lucide {
+    height: var(--icon-size);
+    width: var(--icon-size);
+    flex: none;
+    stroke-width: var(--icon-stroke);
+    color: var(--nav-folder-collapse-color);
+}
