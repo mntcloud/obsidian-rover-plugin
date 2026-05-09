@@ -30,8 +30,7 @@ export default class RoverPlugin extends Plugin {
     });
 
     Bookmarks.items = this.settings.bookmarks;
-
-    Recents.list = this.settings.recents;
+    Recents.previous = this.settings.recents;
 
     this.registerView(VIEW_TYPE, (leaf) => new RoverSidebarView(leaf));
 

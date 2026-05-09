@@ -150,8 +150,9 @@ export class ExplorerBaseModel {
     const file = this.obsidian.vault.getFileByPath(path);
 
     if (file) {
-      this.recentsModel.update();
       await leaf.openFile(file);
+
+      this.recentsModel.update();
     }
   }
 

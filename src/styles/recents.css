@@ -30,8 +30,9 @@
         max-width: 400px;
     }
 
-.rover-recents > div.active {
-    color: var(--color-base-100);
-    background-color: var(--background-primary);
-    border-radius: var(--radius-l);
+    & > span {
+        display: block;
+        margin: 5px 10px;
+        color: var(--text-faint);
+    }
 }

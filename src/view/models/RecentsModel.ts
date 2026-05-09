@@ -1,13 +1,61 @@
-import type { ObsidianAppModel } from "../../core";
+import { EventRef, TFile } from "obsidian";
+import type { ObsidianAppModel, RoverRecentsStore } from "rover/core";
+
+import m from "mithril";
+import { extname } from "node:path";
 
 export class RecentsBaseModel {
   pendingNewFolderPath?: string;
   oldFolderPath?: string;
 
-  active?: string;
-  list: string[] = [];
+  active: TFile | null = null;
+  previous: RoverRecentsStore[] = [];
+
+  vaultEvRef: EventRef[] = [];
+  workspaceEvRef?: EventRef;
 
   constructor(private obsidian: ObsidianAppModel | undefined) {}
+
+  attachListeners() {
+    // TODO: rework methods to combine with FileSystem handlers
+    //       it should help to control m.redraw() more reliable
+    this.vaultEvRef = [
+      this.obsidian!.vault.on("delete", (file) => {
+        this.previous = this.previous.filter((path) => path.full != file.path);
+
+        this.save();
+        m.redraw();
+      }),
+      this.obsidian!.vault.on("rename", async (file, oldPath) => {
+        if (file.path == this.obsidian!.workspace.getActiveFile()?.path) {
+          this.active = this.obsidian!.workspace.getActiveFile();
+          m.redraw();
+        } else {
+          const index = this.previous.findIndex((path) => path.full == oldPath);
+
+          if (index != -1) {
+            this.previous[index] = {
+              parentPath: file.parent?.isRoot() ? "" : file.parent!.path,
+              name: file.name.replace(extname(file.name), ""),
+              full: file.path,
+            };
+
+            this.save();
+            m.redraw();
+          }
+        }
+      }),
+    ];
+
+    this.workspaceEvRef = this.obsidian!.workspace.on("file-open", () => {
+      this.update();
+    });
+  }
+
+  detachListeners() {
+    this.vaultEvRef.forEach((ref) => this.obsidian!.vault.offref(ref));
+    this.obsidian!.workspace.offref(this.workspaceEvRef!);
+  }
 
   update(): void {
     if (!this.obsidian) {
@@ -16,14 +64,28 @@ export class RecentsBaseModel {
     }
 
     if (this.active) {
-      this.list = [this.active, ...this.list.slice(0, 5)];
+      this.previous = [
+        {
+          parentPath: this.active.parent?.isRoot()
+            ? ""
+            : this.active.parent!.path,
+          name: this.active.basename,
+          full: this.active.path,
+        },
+        ...this.previous.slice(0, 5),
+      ];
     }
 
-    this.active = this.obsidian.workspace.getActiveFile()?.path;
+    this.active = this.obsidian.workspace.getActiveFile();
 
-    this.list = this.list.filter((path) => path != this.active);
+    if (this.active) {
+      this.previous = this.previous.filter(
+        (path) => path.full != this.active!.path,
+      );
+    }
 
     this.save();
+    m.redraw();
   }
 
   save() {
@@ -32,7 +94,7 @@ export class RecentsBaseModel {
       return;
     }
 
-    this.obsidian.settings.recents = this.list;
+    this.obsidian.settings.recents = this.previous;
     this.obsidian.save();
   }
 }

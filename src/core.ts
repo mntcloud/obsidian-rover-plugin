@@ -27,5 +27,11 @@ export interface ObsidianAppModel {
 export interface RoverPluginSettings {
   mySetting: string;
   bookmarks: RoverBookmark[];
-  recents: string[];
+  recents: RoverRecentsStore[];
 }
+
+export type RoverRecentsStore = {
+  parentPath: string;
+  name: string;
+  full: string;
+};
