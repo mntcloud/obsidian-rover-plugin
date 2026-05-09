@@ -131,7 +131,7 @@ export class File implements m.ClassComponent<Attr> {
     return (
       <div
         className="rover-file"
-        style={`margin-left: calc(6px * ${vnode.attrs.nest})`}
+        style={`margin-left: calc(10px * ${vnode.attrs.nest})`}
         draggable={true}
         ondragstart={(ev: DragEvent) => this.onDragStart(ev, vnode.attrs.path)}
         ondragend={(ev: DragEvent) => this.onDragEnd(ev)}

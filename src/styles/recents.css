@@ -6,18 +6,29 @@
 
 .rover-recents {
     max-width: 400px;
+
+    & > div.active {
+        font-weight: var(--font-medium);
+        color: var(--text-normal);
+        background-color: var(--background-primary);
+        border-radius: var(--radius-l);
+    }
 }
 
 .rover-recents-others {
+    background-color: var(--background-secondary);
+    border: var(--border-width) solid var(--background-modifier-border);
+    border-radius: var(--radius-m);
+
     overflow-x: hidden;
     overflow-y: auto;
     max-height: 200px;
     margin: 10px 0px;
-}
+    padding: 6px 0;
 
-.rover-recents-others > .rover-file {
-    max-width: 400px;
-}
+    & > .rover-file {
+        max-width: 400px;
+    }
 
 .rover-recents > div.active {
     color: var(--color-base-100);

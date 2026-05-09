@@ -160,7 +160,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
           className={`rover-bookmark-item ${
             this.isDragEntered ? "hovered" : ""
           }`}
-          style={`margin-left: calc(8px * ${vnode.attrs.nest})`}
+          style={`margin-left: calc(18.5px * ${vnode.attrs.nest})`}
           draggable={true}
           data-crd={vnode.key}
           oncontextmenu={(ev: MouseEvent) =>
