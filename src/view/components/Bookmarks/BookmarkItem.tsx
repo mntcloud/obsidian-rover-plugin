@@ -1,10 +1,10 @@
 import m from "mithril";
-import { log, logError } from "rover/utils";
+import { log, logError } from "rover/helpers";
 import { Space } from "./Space";
 
-import { Bookmarks, Explorer } from "rover/view/models";
 import { Menu } from "obsidian";
 import { RoverBookmark } from "rover/core";
+import { Bookmarks, Explorer } from "rover/view/models";
 
 interface Attr {
   position: number[];
@@ -30,9 +30,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
   }
 
   onDragStart(ev: DragEvent, attrs: Attr, key: number) {
-    Bookmarks.dragged = {
-      pos: attrs.position,
-    };
+    Bookmarks.setDraggedPosition(attrs.position);
 
     ev.dataTransfer!.setData(
       "application/rover.bookmark",
@@ -50,7 +48,7 @@ export class BookmarkItem implements m.ClassComponent<Attr> {
   onDragEnd() {
     log(`DRAGEND, checkpoint`);
     if (Bookmarks.dragged) {
-      Bookmarks.dragged = undefined;
+      Bookmarks.setDraggedPosition(undefined);
     }
 
     this.isDragStarted = false;

@@ -2,9 +2,9 @@ import m from "mithril";
 
 import { ListBookmarks } from "./ListBookmarks";
 import { RoverBookmark } from "rover/core";
-import { Bookmarks } from "rover/view/models";
 import { Space } from "./Space";
 import { Menu } from "obsidian";
+import { Bookmarks } from "rover/view/models";
 
 interface Attr {
   position: number[];
@@ -85,9 +85,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
       }),
     );
 
-    Bookmarks.dragged = {
-      pos: attrs.position,
-    };
+    Bookmarks.setDraggedPosition(attrs.position);
 
     this.isDragStarted = true;
   }
@@ -108,6 +106,7 @@ export class BookmarkFolder implements m.ClassComponent<Attr> {
 
   onDragEnd() {
     this.isDragStarted = false;
+    Bookmarks.setDraggedPosition(undefined);
 
     // do not bubble
     return false;

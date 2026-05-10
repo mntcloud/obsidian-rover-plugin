@@ -11,16 +11,14 @@ export class ContainerView implements m.ClassComponent {
     if (ev.dataTransfer) {
       switch (ev.dataTransfer.types[0]) {
         case "application/rover.file":
-          Bookmarks.dragged = {
-            pos: [-1],
-          };
+          Bookmarks.setDraggedPosition([-1]);
       }
     }
   }
 
   onDragEnd(ev: DragEvent) {
     if (ev.dataTransfer) {
-      Bookmarks.dragged = undefined;
+      Bookmarks.setDraggedPosition(undefined);
     }
   }
 

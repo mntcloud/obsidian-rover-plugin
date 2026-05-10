@@ -3,7 +3,6 @@ import m from "mithril";
 import { CreateItemModal } from "../../modals/bookmarks/CreateItem";
 import { RoverBookmark } from "rover/core";
 import { Bookmarks } from "rover/view/models";
-import { Obsidian } from "rover/view/models/Obsidian";
 import { ListBookmarks } from "./Bookmarks/ListBookmarks";
 
 interface Attr {
@@ -13,10 +12,6 @@ interface Attr {
 export class BookmarksView implements m.ClassComponent<Attr> {
   oncreate(vnode: m.VnodeDOM<Attr, this>) {
     Bookmarks.listenToVault();
-  }
-
-  onremove(vnode: m.VnodeDOM<Attr, this>) {
-    Bookmarks.unlistenToVault();
   }
 
   onDrop(ev: DragEvent) {
@@ -31,19 +26,7 @@ export class BookmarksView implements m.ClassComponent<Attr> {
       case ev.dataTransfer.types.includes("application/rover.file"): {
         const path = ev.dataTransfer.getData("application/rover.file");
 
-        new CreateItemModal(Obsidian!.app, path, (name, emoji, path) => {
-          Bookmarks.items.push({
-            crd: Date.now(),
-            name: name,
-            emojicon: emoji,
-            path: path,
-          });
-
-          Bookmarks.save();
-
-          m.redraw();
-        }).open();
-
+        Bookmarks.openModal("createItem", { pos: [], path });
         break;
       }
     }

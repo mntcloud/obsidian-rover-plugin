@@ -2,7 +2,7 @@ import { describe, test, before, beforeEach } from "node:test";
 import assert from "node:assert";
 import { BookmarksBaseModel } from "rover/view/models/BookmarksModel";
 import { RoverBookmark } from "rover/core";
-import { log } from "rover/utils";
+import { log } from "rover/helpers";
 
 const item = (
   name: string,

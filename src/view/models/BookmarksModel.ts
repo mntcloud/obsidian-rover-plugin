@@ -1,18 +1,14 @@
 import { ModifyItemModal } from "rover/modals/bookmarks/ModifyItem";
 import { RoverBookmark } from "../../core";
-import type { ObsidianAppModel } from "../../core";
 
 import m from "mithril";
 
-import { logError, log } from "rover/utils";
+import { logError, log } from "rover/helpers";
 import { CreateFolderModal } from "rover/modals/bookmarks/CreateFolder";
 import { CreateItemModal } from "rover/modals/bookmarks/CreateItem";
-import { EventRef } from "obsidian";
+import { RoverView } from "../RoverSidebarView";
 
 export class BookmarksBaseModel {
-  evrefs: EventRef[] = [];
-
-  items: RoverBookmark[] = [];
   isTesting = false;
   isFileDragStarted = false;
 
@@ -24,26 +20,21 @@ export class BookmarksBaseModel {
       }
     | undefined = undefined;
 
-  constructor(private obsidian: ObsidianAppModel | undefined) {}
+  constructor(
+    private rover: RoverView | undefined,
+    public items: RoverBookmark[] = [],
+  ) {}
 
   listenToVault() {
-    this.evrefs = [
-      this.obsidian!.vault.on("rename", (file, old) => {
-        const item = this.findByPath(old);
+    this.rover!.subscribe("vault:rename", (file, old) => {
+      const item = this.findByPath(old);
 
-        if (item) {
-          item.path = file.path;
+      if (item) {
+        item.path = file.path;
 
-          this.save();
-        }
-      }),
-    ];
-  }
-
-  unlistenToVault() {
-    for (const evref of this.evrefs) {
-      this.obsidian!.vault.offref(evref);
-    }
+        this.save();
+      }
+    });
   }
 
   // We need to combine somehow key and value from Modals,
@@ -80,7 +71,7 @@ export class BookmarksBaseModel {
           },
         ]
   ) {
-    if (!this.obsidian) {
+    if (!this.rover) {
       logError("ROVER: no instance of obsidian");
       return;
     }
@@ -88,7 +79,7 @@ export class BookmarksBaseModel {
     switch (name) {
       case "modifyItem": {
         return new ModifyItemModal(
-          this.obsidian!.app,
+          this.rover!.app,
           params!.name,
           params.emoji,
           (newName, newEmoji, path) => {
@@ -101,17 +92,26 @@ export class BookmarksBaseModel {
       }
       case "createItem": {
         return new CreateItemModal(
-          this.obsidian!.app,
+          this.rover!.app,
           params.path!,
           (name, emoji, path) => {
-            const seq = this.follow(params.pos);
+            if (params.pos.length) {
+              const seq = this.follow(params.pos);
 
-            seq.splice(params.pos[params.pos.length - 1], 0, {
-              crd: Date.now(),
-              name: name,
-              emojicon: emoji,
-              path: path,
-            });
+              seq.splice(params.pos[params.pos.length - 1], 0, {
+                crd: Date.now(),
+                name: name,
+                emojicon: emoji,
+                path: path,
+              });
+            } else {
+              this.items.push({
+                crd: Date.now(),
+                name: name,
+                emojicon: emoji,
+                path: path,
+              });
+            }
 
             this.save();
 
@@ -120,7 +120,7 @@ export class BookmarksBaseModel {
         ).open();
       }
       case "createFolder": {
-        return new CreateFolderModal(this.obsidian!.app, (name, emoji) => {
+        return new CreateFolderModal(this.rover!.app, (name, emoji) => {
           this.createFolder(name, emoji, params.firstItem, params.secondItem);
 
           this.save();
@@ -129,6 +129,14 @@ export class BookmarksBaseModel {
           m.redraw();
         }).open();
       }
+    }
+  }
+
+  setDraggedPosition(pos?: number[]) {
+    if (pos) {
+      this.dragged = { pos };
+    } else {
+      this.dragged = undefined;
     }
   }
 
@@ -215,13 +223,13 @@ export class BookmarksBaseModel {
   }
 
   save() {
-    if (!this.obsidian) {
+    if (!this.rover) {
       logError("obsidian: uninitialized");
       return;
     }
 
-    this.obsidian.settings.bookmarks = this.items;
-    this.obsidian.save();
+    this.rover.settings.bookmarks = this.items;
+    this.rover.save(this.rover.settings);
   }
 
   /**

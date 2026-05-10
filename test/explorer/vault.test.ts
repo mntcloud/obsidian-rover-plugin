@@ -3,7 +3,7 @@ import assert from "node:assert";
 import { ExplorerBaseModel } from "rover/view/models/ExplorerModel";
 import { RecentsBaseModel } from "rover/view/models/RecentsModel";
 import { Stat } from "obsidian";
-import { log } from "rover/utils";
+import { log } from "rover/helpers";
 
 // jest.mock("view/models/data/Obsidian");
 

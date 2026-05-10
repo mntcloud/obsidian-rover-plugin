@@ -2,7 +2,6 @@ import m from "mithril";
 
 import { Menu } from "obsidian";
 import { Bookmarks, Explorer } from "rover/view/models";
-import { Obsidian } from "rover/view/models/Obsidian";
 
 interface Attr {
   name: string;
@@ -22,19 +21,7 @@ export class File implements m.ClassComponent<Attr> {
 
   async handleEnterKey(ev: KeyboardEvent, path: string) {
     if (ev.code == "Enter") {
-      const file = Obsidian!.vault.getFileByPath(path)!;
-
-      if (file.parent) {
-        await Obsidian!.app.fileManager.renameFile(
-          file,
-          `${file.parent.path}/${this.renameFieldText}.${file.extension}`,
-        );
-      } else {
-        await Obsidian!.app.fileManager.renameFile(
-          file,
-          `${this.renameFieldText}.${file.extension}`,
-        );
-      }
+      await Explorer.renameFile(path, this.renameFieldText!);
 
       this.isEdited = false;
       this.renameFieldText = undefined;
@@ -58,7 +45,7 @@ export class File implements m.ClassComponent<Attr> {
 
   handleContextMenu(ev: PointerEvent, path: string) {
     const menu = new Menu();
-    const file = Obsidian!.vault.getFileByPath(path)!;
+    const file = Explorer.retrieve("file", path)!;
 
     menu.addItem((item) =>
       item
@@ -66,17 +53,7 @@ export class File implements m.ClassComponent<Attr> {
         .setIcon("documents")
         .setSection("action-primary")
         .onClick(async () => {
-          if (file.parent) {
-            await Obsidian!.vault.copy(
-              file,
-              `${file.parent.path}/${file.basename} new.${file.extension}`,
-            );
-          } else {
-            await Obsidian!.vault.copy(
-              file,
-              `${file.basename} new.${file.extension}`,
-            );
-          }
+          await Explorer.copyFile(file);
         }),
     );
 
@@ -94,7 +71,7 @@ export class File implements m.ClassComponent<Attr> {
     );
 
     if (file) {
-      Obsidian!.workspace.trigger(
+      Explorer.rover!.app.workspace.trigger(
         "file-menu",
         menu,
         file,
@@ -108,7 +85,7 @@ export class File implements m.ClassComponent<Attr> {
         .setIcon("trash")
         .setSection("danger")
         .onClick(async () => {
-          await Obsidian!.vault.trash(file, true);
+          await Explorer.delete(file);
         }),
     );
 

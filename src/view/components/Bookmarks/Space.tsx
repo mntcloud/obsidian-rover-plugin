@@ -1,5 +1,5 @@
 import m from "mithril";
-import { logError } from "rover/utils";
+import { logError } from "rover/helpers";
 import { Bookmarks } from "rover/view/models";
 import { RoverBookmark } from "rover/core";
 

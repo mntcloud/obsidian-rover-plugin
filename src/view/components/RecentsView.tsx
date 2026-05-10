@@ -1,11 +1,9 @@
 /* eslint-disable @typescript-eslint/prefer-for-of */
 
 import m from "mithril";
-import { EventRef } from "obsidian";
-import { log } from "rover/utils";
+import { log } from "rover/helpers";
 
 import { Bookmarks, Explorer, Recents } from "rover/view/models";
-import { Obsidian } from "rover/view/models/Obsidian";
 
 export class RecentsView implements m.ClassComponent {
   onDragStart(ev: DragEvent, path: string) {
@@ -20,12 +18,7 @@ export class RecentsView implements m.ClassComponent {
 
   oncreate(vnode: m.VnodeDOM<{}, this>) {
     Recents.attachListeners();
-    Recents.update();
-    m.redraw();
-  }
-
-  onremove(vnode: m.VnodeDOM<{}, this>) {
-    Recents.detachListeners();
+    Recents.update(true);
   }
 
   view(_vnode: m.Vnode<{}, this>) {

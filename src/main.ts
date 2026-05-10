@@ -1,16 +1,9 @@
-import {
-  App,
-  Plugin,
-  PluginSettingTab,
-  Setting,
-  WorkspaceLeaf,
-} from "obsidian";
-import { RoverSidebarView, VIEW_TYPE } from "rover/view/RoverSidebarView";
+import { EventRef, Plugin, Vault, Workspace, WorkspaceLeaf } from "obsidian";
+import { RoverView, VIEW_TYPE } from "rover/view/RoverSidebarView";
 
-import * as utils from "./utils";
-import { init, Obsidian } from "rover/view/models/Obsidian";
+import { log } from "./helpers";
 import { RoverPluginSettings } from "rover/core";
-import { Recents, Bookmarks } from "rover/view/models";
+import { RoverSettingTab } from "./settings";
 
 const DEFAULT_SETTINGS: RoverPluginSettings = {
   mySetting: "default",
@@ -24,15 +17,14 @@ export default class RoverPlugin extends Plugin {
   async onload() {
     await this.loadSettings();
 
-    init(this.app, this.settings, () => {
-      this.settings = Obsidian!.settings;
-      this.saveSettings();
-    });
-
-    Bookmarks.items = this.settings.bookmarks;
-    Recents.previous = this.settings.recents;
-
-    this.registerView(VIEW_TYPE, (leaf) => new RoverSidebarView(leaf));
+    this.registerView(
+      VIEW_TYPE,
+      (leaf) =>
+        new RoverView(leaf, this.settings, (settings) => {
+          this.settings = settings;
+          this.saveSettings();
+        }),
+    );
 
     this.app.workspace.onLayoutReady(async () => {
       await this.activateView();
@@ -41,7 +33,7 @@ export default class RoverPlugin extends Plugin {
     // This adds a settings tab so the user can configure various aspects of the plugin
     this.addSettingTab(new RoverSettingTab(this.app, this));
 
-    utils.log("deployed on Obsidian");
+    log("deployed on Obsidian");
   }
 
   async onunload() {
@@ -70,33 +62,5 @@ export default class RoverPlugin extends Plugin {
 
       await leaf.setViewState({ type: VIEW_TYPE, active: true });
     }
-  }
-}
-
-class RoverSettingTab extends PluginSettingTab {
-  plugin: RoverPlugin;
-
-  constructor(app: App, plugin: RoverPlugin) {
-    super(app, plugin);
-    this.plugin = plugin;
-  }
-
-  display(): void {
-    const { containerEl } = this;
-
-    containerEl.empty();
-
-    new Setting(containerEl)
-      .setName("Setting #1")
-      .setDesc("It's a secret")
-      .addText((text) =>
-        text
-          .setPlaceholder("Enter your secret")
-          .setValue(this.plugin.settings.mySetting)
-          .onChange(async (value) => {
-            this.plugin.settings.mySetting = value;
-            await this.plugin.saveSettings();
-          }),
-      );
   }
 }

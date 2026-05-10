@@ -1,34 +1,34 @@
 import { EventRef, TFile } from "obsidian";
-import type { ObsidianAppModel, RoverRecentsStore } from "rover/core";
+import type { RoverRecentsStore } from "rover/core";
 
 import m from "mithril";
 import { extname } from "node:path";
+import { RoverView } from "../RoverSidebarView";
+import { log } from "rover/helpers";
 
 export class RecentsBaseModel {
   pendingNewFolderPath?: string;
   oldFolderPath?: string;
 
   active: TFile | null = null;
-  previous: RoverRecentsStore[] = [];
 
-  vaultEvRef: EventRef[] = [];
-  workspaceEvRef?: EventRef;
-
-  constructor(private obsidian: ObsidianAppModel | undefined) {}
+  constructor(
+    private rover: RoverView | undefined,
+    public previous: RoverRecentsStore[] = [],
+  ) {}
 
   attachListeners() {
     // TODO: rework methods to combine with FileSystem handlers
     //       it should help to control m.redraw() more reliable
-    this.vaultEvRef = [
-      this.obsidian!.vault.on("delete", (file) => {
-        this.previous = this.previous.filter((path) => path.full != file.path);
+    (this.rover!.subscribe("vault:delete", (file) => {
+      this.previous = this.previous.filter((path) => path.full != file.path);
 
-        this.save();
-        m.redraw();
-      }),
-      this.obsidian!.vault.on("rename", async (file, oldPath) => {
-        if (file.path == this.obsidian!.workspace.getActiveFile()?.path) {
-          this.active = this.obsidian!.workspace.getActiveFile();
+      this.save();
+      m.redraw();
+    }),
+      this.rover!.subscribe("vault:rename", async (file, oldPath) => {
+        if (file.path == this.rover!.app.workspace.getActiveFile()?.path) {
+          this.active = this.rover!.app.workspace.getActiveFile();
           m.redraw();
         } else {
           const index = this.previous.findIndex((path) => path.full == oldPath);
@@ -45,20 +45,13 @@ export class RecentsBaseModel {
           }
         }
       }),
-    ];
-
-    this.workspaceEvRef = this.obsidian!.workspace.on("file-open", () => {
-      this.update();
-    });
+      this.rover!.subscribe("workspace:file-open", () => {
+        this.update();
+      }));
   }
 
-  detachListeners() {
-    this.vaultEvRef.forEach((ref) => this.obsidian!.vault.offref(ref));
-    this.obsidian!.workspace.offref(this.workspaceEvRef!);
-  }
-
-  update(): void {
-    if (!this.obsidian) {
+  update(triggerRedraw: boolean = false): void {
+    if (!this.rover) {
       console.error("ROVER: app instance is unintialized");
       return;
     }
@@ -76,7 +69,7 @@ export class RecentsBaseModel {
       ];
     }
 
-    this.active = this.obsidian.workspace.getActiveFile();
+    this.active = this.rover.app.workspace.getActiveFile();
 
     if (this.active) {
       this.previous = this.previous.filter(
@@ -85,16 +78,19 @@ export class RecentsBaseModel {
     }
 
     this.save();
-    m.redraw();
+
+    if (triggerRedraw) {
+      m.redraw();
+    }
   }
 
   save() {
-    if (!this.obsidian) {
+    if (!this.rover) {
       console.error("ROVER: Obsidian API is not available");
       return;
     }
 
-    this.obsidian.settings.recents = this.previous;
-    this.obsidian.save();
+    this.rover.settings.recents = this.previous;
+    this.rover.save(this.rover.settings);
   }
 }

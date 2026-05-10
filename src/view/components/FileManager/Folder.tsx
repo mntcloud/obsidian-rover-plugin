@@ -2,11 +2,10 @@ import m from "mithril";
 import { File } from "./File";
 
 import { RoverFile } from "rover/core";
-import { Obsidian } from "rover/view/models/Obsidian";
 import { Explorer } from "rover/view/models";
 
 import { Menu } from "obsidian";
-import { log } from "rover/utils";
+import { log } from "rover/helpers";
 
 interface Attr {
   name: string;
@@ -42,7 +41,7 @@ export class Folder implements m.ClassComponent<Attr> {
       }
 
       if (this.action && this.action.mode === "create") {
-        await Obsidian!.vault.adapter.mkdir(`${path}/${this.action.value}`);
+        await Explorer.createDirectory(this.action.value, path);
       }
 
       this.action = undefined;
@@ -113,7 +112,7 @@ export class Folder implements m.ClassComponent<Attr> {
         case "application/rover.file": {
           const path = ev.dataTransfer!.getData("application/rover.file");
 
-          await Explorer.moveFile(path, targetPath);
+          await Explorer.move(path, targetPath);
           break;
         }
         case "application/rover.folder": {
@@ -123,7 +122,7 @@ export class Folder implements m.ClassComponent<Attr> {
             break;
           }
 
-          await Explorer.moveFolder(path, targetPath);
+          await Explorer.move(path, targetPath);
         }
       }
     }
@@ -134,7 +133,7 @@ export class Folder implements m.ClassComponent<Attr> {
 
   handleContextMenu(ev: PointerEvent, path: string) {
     const menu = new Menu();
-    const folder = Obsidian!.vault.getFolderByPath(path)!;
+    const folder = Explorer.retrieve("folder", path)!;
 
     menu.addItem((item) =>
       item
@@ -176,12 +175,12 @@ export class Folder implements m.ClassComponent<Attr> {
         .setIcon("trash")
         .setSection("danger")
         .onClick(async () => {
-          await Obsidian!.vault.trash(folder, false);
+          await Explorer.delete(folder);
         }),
     );
 
     if (folder) {
-      Obsidian!.workspace.trigger(
+      Explorer.rover!.app.workspace.trigger(
         "file-menu",
         menu,
         folder,

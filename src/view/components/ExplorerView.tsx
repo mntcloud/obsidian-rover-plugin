@@ -5,10 +5,9 @@ import m from "mithril";
 import { File } from "./FileManager/File";
 import { Folder } from "./FileManager/Folder";
 import { RoverFile } from "rover/core";
-import { Obsidian } from "rover/view/models/Obsidian";
 import { Explorer } from "rover/view/models";
 import { Menu, TAbstractFile } from "obsidian";
-import { log } from "rover/utils";
+import { log } from "rover/helpers";
 
 export class ExplorerView implements m.ClassComponent {
   root!: RoverFile[];
@@ -29,10 +28,6 @@ export class ExplorerView implements m.ClassComponent {
   oncreate(vnode: m.VnodeDOM<{}, this>) {
     this.dom = vnode.dom;
     Explorer.listenToVault(this.onVaultUpdate.bind(this));
-  }
-
-  onremove(vnode: m.VnodeDOM<{}, this>) {
-    Explorer.unlistenToVault();
   }
 
   async onVaultUpdate(isRoot: boolean, path?: string) {
@@ -57,21 +52,7 @@ export class ExplorerView implements m.ClassComponent {
   }
 
   async rootUpdate() {
-    const files = [];
-    const workspaceRoot = Obsidian!.vault.getRoot();
-
-    for (const item of workspaceRoot.children) {
-      const stat = await Obsidian!.vault.adapter.stat(item.path);
-
-      files.push({
-        mtime: stat!.ctime,
-        name: stat!.type != "folder" ? basename(item.name, ".md") : item.name,
-        path: item.path,
-        isFolder: stat!.type == "folder",
-      });
-    }
-
-    files.sort(Explorer.comparator);
+    const files = await Explorer.getFiles();
     this.root = files;
   }
 
@@ -88,24 +69,18 @@ export class ExplorerView implements m.ClassComponent {
     ev.stopPropagation();
 
     if (ev.dataTransfer && ev.dataTransfer.items.length == 1) {
-      let file: TAbstractFile | null = null;
-
       switch (ev.dataTransfer.items[0].type) {
         case "application/rover.file": {
           const path = ev.dataTransfer!.getData("application/rover.file");
+          await Explorer.move(path);
 
-          file = Obsidian!.vault.getFileByPath(path);
           break;
         }
         case "application/rover.folder": {
           const path = ev.dataTransfer!.getData("application/rover.folder");
 
-          file = Obsidian!.vault.getFolderByPath(path);
+          await Explorer.move(path);
         }
-      }
-
-      if (file) {
-        await Obsidian!.app.fileManager.renameFile(file, file.name);
       }
     }
   }
@@ -121,7 +96,7 @@ export class ExplorerView implements m.ClassComponent {
   async onEnterKey(ev: KeyboardEvent) {
     if (ev.code == "Enter") {
       if (this.action && this.action.mode === "create") {
-        await Obsidian!.vault.adapter.mkdir(`${this.action.value}`);
+        await Explorer.createDirectory(this.action.value);
       }
 
       this.action = undefined;
@@ -136,7 +111,7 @@ export class ExplorerView implements m.ClassComponent {
 
   onContextMenu(ev: PointerEvent) {
     const menu = new Menu();
-    const file = Obsidian!.vault.getRoot();
+    const file = Explorer.rover!.app.vault.getRoot();
 
     menu.addItem((item) =>
       item
@@ -153,7 +128,7 @@ export class ExplorerView implements m.ClassComponent {
         }),
     );
 
-    Obsidian!.workspace.trigger(
+    Explorer.rover!.app.workspace.trigger(
       "file-menu",
       menu,
       file,
