@@ -104,11 +104,13 @@ export class RoverView extends ItemView {
     this.unsubscribeAll();
   }
 
-  async process(event: ObsidianEventRegistry["event"], ...args: unknown[]) {
+  async process(event: ObsidianEventRegistry["event"], args: unknown[]) {
     const sub = this.subs.get(event);
 
+    log(event, args);
+
     for (const handler of sub!.handlers) {
-      const returned = handler(args);
+      const returned = handler(...args);
 
       if (returned instanceof Promise) {
         await returned;
