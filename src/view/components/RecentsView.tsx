@@ -29,12 +29,12 @@ export class RecentsView implements m.ClassComponent {
           draggable={true}
           ondragstart={(ev: DragEvent) =>
             Recents.active
-              ? this.onDragStart(ev, Recents.active.path)
+              ? this.onDragStart(ev, Recents.active.full)
               : log("no can't do with empty file")
           }
           ondragend={this.onDragEnd}
         >
-          {Recents.active ? Recents.active.basename : "No active file"}
+          {Recents.active ? Recents.active.name : "No active file"}
         </div>
 
         <div className="rover-recents-others">

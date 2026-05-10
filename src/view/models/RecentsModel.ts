@@ -10,7 +10,7 @@ export class RecentsBaseModel {
   pendingNewFolderPath?: string;
   oldFolderPath?: string;
 
-  active: TFile | null = null;
+  active?: RoverRecentsStore;
 
   constructor(
     private rover: RoverView | undefined,
@@ -20,34 +20,33 @@ export class RecentsBaseModel {
   attachListeners() {
     // TODO: rework methods to combine with FileSystem handlers
     //       it should help to control m.redraw() more reliable
-    (this.rover!.subscribe("vault:delete", (file) => {
+    this.rover!.subscribe("vault:delete", (file) => {
       this.previous = this.previous.filter((path) => path.full != file.path);
 
       this.save();
-      m.redraw();
-    }),
-      this.rover!.subscribe("vault:rename", async (file, oldPath) => {
-        if (file.path == this.rover!.app.workspace.getActiveFile()?.path) {
-          this.active = this.rover!.app.workspace.getActiveFile();
-          m.redraw();
-        } else {
-          const index = this.previous.findIndex((path) => path.full == oldPath);
+    });
+    this.rover!.subscribe("vault:rename", async (file, oldPath) => {
+      if (file.path == this.rover!.app.workspace.getActiveFile()?.path) {
+        this.active = this.createRecentsItem(
+          this.rover!.app.workspace.getActiveFile()!,
+        );
+      } else {
+        const index = this.previous.findIndex((path) => path.full == oldPath);
 
-          if (index != -1) {
-            this.previous[index] = {
-              parentPath: file.parent?.isRoot() ? "" : file.parent!.path,
-              name: file.name.replace(extname(file.name), ""),
-              full: file.path,
-            };
+        if (index != -1) {
+          this.previous[index] = {
+            parentPath: file.parent?.isRoot() ? "" : file.parent!.path,
+            name: file.name.replace(extname(file.name), ""),
+            full: file.path,
+          };
 
-            this.save();
-            m.redraw();
-          }
+          this.save();
         }
-      }),
-      this.rover!.subscribe("workspace:file-open", () => {
-        this.update();
-      }));
+      }
+    });
+    this.rover!.subscribe("workspace:file-open", () => {
+      this.update();
+    });
   }
 
   update(triggerRedraw: boolean = false): void {
@@ -57,23 +56,16 @@ export class RecentsBaseModel {
     }
 
     if (this.active) {
-      this.previous = [
-        {
-          parentPath: this.active.parent?.isRoot()
-            ? ""
-            : this.active.parent!.path,
-          name: this.active.basename,
-          full: this.active.path,
-        },
-        ...this.previous.slice(0, 5),
-      ];
+      this.previous = [this.active, ...this.previous.slice(0, 5)];
     }
 
-    this.active = this.rover.app.workspace.getActiveFile();
+    const activeFile = this.rover.app.workspace.getActiveFile();
 
-    if (this.active) {
+    if (activeFile) {
+      this.active = this.createRecentsItem(activeFile);
+
       this.previous = this.previous.filter(
-        (path) => path.full != this.active!.path,
+        (path) => path.full != this.active!.full,
       );
     }
 
@@ -82,6 +74,14 @@ export class RecentsBaseModel {
     if (triggerRedraw) {
       m.redraw();
     }
+  }
+
+  createRecentsItem(file: TFile) {
+    return {
+      parentPath: file.parent?.isRoot() ? "" : file.parent!.path,
+      name: file.basename,
+      full: file.path,
+    };
   }
 
   save() {
