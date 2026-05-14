@@ -9,6 +9,7 @@ if you want to view the source, please visit the github repository of this plugi
 `;
 
 const prod = process.argv[2] === "production";
+const test = process.argv[2] === "test";
 
 const context = await esbuild.context({
   banner: {
@@ -38,7 +39,7 @@ const context = await esbuild.context({
   logLevel: "info",
   sourcemap: prod ? false : "inline",
   treeShaking: true,
-  outdir: ".",
+  outdir: test ? "./test/e2e/vault/.obsidian/plugins/rover/" : ".",
   minify: prod,
 });
 

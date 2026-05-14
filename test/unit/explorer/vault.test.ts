@@ -14,15 +14,17 @@ import { log } from "rover/helpers";
 //       about test case
 
 const mockedObsidian = {
-  vault: {
-    getRoot: () =>
-      ({
-        children: [],
-      }) as any,
-    adapter: {
-      stat: mock.fn<(normalizePath: string) => Promise<Stat | null>>(),
+  app: {
+    vault: {
+      getRoot: () =>
+        ({
+          children: [],
+        }) as any,
+      adapter: {
+        stat: mock.fn<(normalizePath: string) => Promise<Stat | null>>(),
+      },
+      configDir: "",
     },
-    configDir: "",
   },
   save: () => {},
 };
@@ -31,10 +33,7 @@ describe("Vault Listeners", () => {
   let Explorer: ExplorerBaseModel;
 
   before(() => {
-    Explorer = new ExplorerBaseModel(
-      mockedObsidian as any,
-      new RecentsBaseModel(mockedObsidian as any),
-    );
+    Explorer = new ExplorerBaseModel(mockedObsidian as any);
 
     Explorer.isBeingTested = true;
   });
