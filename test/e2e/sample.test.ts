@@ -79,9 +79,10 @@ test("when an item is moved inside of bookmarks, there is should be visible loca
   const dataTransfer = await window.evaluateHandle(() => new DataTransfer());
   await bookmark.dispatchEvent("dragstart", { dataTransfer });
 
-  const spaces = await window.locator(".rover div.rover-space").all();
+  const space = window.locator(".rover div.rover-space");
+  await space.first().waitFor();
 
-  expect(spaces.length).toBe(8);
+  await expect(space).toHaveCount(8);
 
   await bookmark.dispatchEvent("dragend", { dataTransfer });
 });
@@ -131,9 +132,10 @@ test("when an item is moved inside of bookmarks, edge case", async ({
   const dataTransfer = await window.evaluateHandle(() => new DataTransfer());
   await bookmark.dispatchEvent("dragstart", { dataTransfer });
 
-  const spaces = await window.locator(".rover div.rover-space").all();
+  const space = window.locator(".rover div.rover-space");
+  await space.first().waitFor();
 
-  expect(spaces.length).toBe(12);
+  await expect(space).toHaveCount(12);
 
   await bookmark.dispatchEvent("dragend", { dataTransfer });
 });

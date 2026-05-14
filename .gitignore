@@ -24,6 +24,8 @@ node_modules
 /test/e2e/vault/.obsidian/plugins/rover/main.js
 /test/e2e/vault/.obsidian/plugins/rover/styles.css
 
+/test-results
+
 # Exclude sourcemaps
 *.map
 

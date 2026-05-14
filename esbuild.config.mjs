@@ -43,7 +43,7 @@ const context = await esbuild.context({
   minify: prod,
 });
 
-if (prod) {
+if (prod || test) {
   await context.rebuild();
   process.exit(0);
 } else {
