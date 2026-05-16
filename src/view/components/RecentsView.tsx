@@ -17,8 +17,7 @@ export class RecentsView implements m.ClassComponent {
   }
 
   oncreate(vnode: m.VnodeDOM<{}, this>) {
-    Recents.attachListeners();
-    Recents.update(true);
+    Recents.init();
   }
 
   view(_vnode: m.Vnode<{}, this>) {

@@ -2,9 +2,7 @@ import { EventRef, TFile } from "obsidian";
 import type { RoverRecentsStore } from "rover/core";
 
 import m from "mithril";
-import { extname } from "node:path";
 import { RoverView } from "../RoverSidebarView";
-import { log } from "rover/helpers";
 
 export class RecentsBaseModel {
   pendingNewFolderPath?: string;
@@ -17,39 +15,47 @@ export class RecentsBaseModel {
     public previous: RoverRecentsStore[] = [],
   ) {}
 
+  init() {
+    this.attachListeners();
+
+    const file = this.rover!.app.workspace.getActiveFile();
+    this.update(file, true);
+  }
+
   attachListeners() {
-    // TODO: rework methods to combine with FileSystem handlers
-    //       it should help to control m.redraw() more reliable
     this.rover!.subscribe("vault:delete", (file) => {
       this.previous = this.previous.filter((path) => path.full != file.path);
 
       this.save();
     });
     this.rover!.subscribe("vault:rename", async (file, oldPath) => {
-      if (file.path == this.rover!.app.workspace.getActiveFile()?.path) {
-        this.active = this.createRecentsItem(
-          this.rover!.app.workspace.getActiveFile()!,
-        );
-      } else {
-        const index = this.previous.findIndex((path) => path.full == oldPath);
+      if (file instanceof TFile) {
+        if (this.active?.full == oldPath) {
+          this.active = this.createRecentsItem(file);
+        } else {
+          const index = this.previous.findIndex((path) => path.full == oldPath);
 
-        if (index != -1) {
-          this.previous[index] = {
-            parentPath: file.parent?.isRoot() ? "" : file.parent!.path,
-            name: file.name.replace(extname(file.name), ""),
-            full: file.path,
-          };
+          if (index != -1) {
+            this.previous[index] = {
+              parentPath: file.parent?.isRoot() ? "" : file.parent!.path,
+              name: file.basename,
+              full: file.path,
+            };
 
-          this.save();
+            this.save();
+          }
         }
       }
     });
-    this.rover!.subscribe("workspace:file-open", () => {
-      this.update();
+    this.rover!.subscribe("workspace:file-open", (file) => {
+      this.update(file);
     });
   }
 
-  update(triggerRedraw: boolean = false): void {
+  update(
+    activeFile: TFile | null = null,
+    triggerRedraw: boolean = false,
+  ): void {
     if (!this.rover) {
       console.error("ROVER: app instance is unintialized");
       return;
@@ -59,11 +65,9 @@ export class RecentsBaseModel {
       this.previous = [this.active, ...this.previous.slice(0, 5)];
     }
 
-    const activeFile = this.rover.app.workspace.getActiveFile();
+    this.active = activeFile ? this.createRecentsItem(activeFile) : undefined;
 
-    if (activeFile) {
-      this.active = this.createRecentsItem(activeFile);
-
+    if (this.active) {
       this.previous = this.previous.filter(
         (path) => path.full != this.active!.full,
       );

@@ -116,9 +116,7 @@ export class File implements m.ClassComponent<Attr> {
           this.handleContextMenu(ev, vnode.attrs.path)
         }
         onclick={
-          !this.isEdited
-            ? () => Explorer.openFile(vnode.attrs.path).then(() => m.redraw())
-            : undefined
+          !this.isEdited ? () => Explorer.openFile(vnode.attrs.path) : undefined
         }
       >
         {!this.isEdited ? (

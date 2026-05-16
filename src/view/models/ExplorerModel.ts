@@ -132,8 +132,6 @@ export class ExplorerBaseModel {
 
     if (file) {
       await leaf.openFile(file);
-
-      this.rover.recents.update(true);
     }
   }
 
