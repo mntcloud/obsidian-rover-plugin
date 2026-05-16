@@ -7,9 +7,11 @@ import {
 } from "@playwright/test";
 import path from "path";
 import { randomBytes } from "crypto";
-import { cp, mkdir, readFile, rm, writeFile } from "fs/promises";
+import { cp, mkdir, readdir, readFile, rm, writeFile } from "fs/promises";
 import { existsSync } from "fs";
 import { RoverBookmark, RoverPluginSettings } from "rover/core";
+
+export const BASE_PATH = path.resolve("./test/e2e");
 
 export const test = base.extend<
   {
@@ -22,10 +24,10 @@ export const test = base.extend<
 >({
   app: [
     async ({}, use, _workerInfo) => {
-      const main = path.resolve("./test/e2e/.obsidian");
+      const main = path.join(BASE_PATH, ".obsidian");
 
-      const vaultdir = path.resolve("./test/e2e/.vault");
-      const datadir = path.resolve("./test/e2e/.userdata");
+      const vaultdir = path.join(BASE_PATH, ".vault");
+      const datadir = path.join(BASE_PATH, ".userdata");
 
       await cp(path.resolve("./test/e2e/vault"), vaultdir, {
         recursive: true,
@@ -90,9 +92,30 @@ export const test = base.extend<
   ],
 
   window: async ({ app }, use) => {
-    const window = await app.firstWindow();
+    const win = await app.firstWindow();
 
-    await use(window);
+    // Wait while Obsidian is loading
+    await win.locator("div.workspace-tab-header").first().waitFor();
+
+    // focus on editor tabs and close them all
+    await win.evaluate(() => {
+      const obsidianApp = (window as any).app;
+
+      obsidianApp.commands.executeCommandById("editor:focus", false);
+      obsidianApp.commands.executeCommandById(
+        "workspace:close-tab-group",
+        false,
+      );
+    });
+
+    // ensure that commands worked well
+    await win
+      .locator("div.workspace-tab-header")
+      .filter({ hasText: "New tab" })
+      .first()
+      .waitFor();
+
+    await use(win);
   },
 
   plugin: async ({ window: app }, use) => {

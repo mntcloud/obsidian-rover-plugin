@@ -19,25 +19,27 @@ test("it shows message about empty bookmarks, when bookmarks are empty", async (
   window,
   plugin,
 }) => {
-  await expect(window.getByText("No recents files yet")).toBeVisible();
+  await window.pause();
+  await expect(
+    window.getByText(/^Drop a file here to create a bookmark$/),
+  ).toBeVisible();
 });
 
 test("create a bookmark, when bookmarks are empty", async ({ window }) => {
   const item = window
-    .locator("div.rover-file")
-    .filter({ hasText: /^File0$/ })
-    .nth(1);
+    .locator(".rover-file-manager div.rover-file")
+    .filter({ hasText: /^File0$/ });
 
   await expect(item).toBeVisible();
 
-  item.dragTo(
+  await item.dragTo(
     window
       .locator("div")
       .filter({ hasText: /^Drop a file here to create a bookmark$/ }),
   );
 
-  await window.getByRole("textbox").nth(1).click();
-  await window.getByRole("textbox").nth(1).fill("hello");
+  await window.getByRole("textbox").first().click();
+  await window.getByRole("textbox").first().fill("hello");
 
   await window.getByRole("textbox", { name: "Use WIN + ;" }).click();
   await window.getByRole("textbox", { name: "Use WIN + ;" }).fill("😭");
@@ -138,4 +140,31 @@ test("when an item is moved inside of bookmarks, edge case", async ({
   await expect(space).toHaveCount(12);
 
   await bookmark.dispatchEvent("dragend", { dataTransfer });
+});
+
+test("when a file is renamed, and if there is one item with old path, bookmarks must be updated ", async ({
+  window,
+  plugin,
+}) => {
+  await plugin.setup([item(0, "A", "File0.md")]);
+
+  await window
+    .locator(".rover-file-manager div.rover-file")
+    .filter({ hasText: /^File0$/ })
+    .click({
+      button: "right",
+    });
+  await window.locator("div").filter({ hasText: "Rename..." }).nth(3).click();
+  await window.locator("input").fill("File1");
+  await window.locator("input").press("Enter");
+
+  await window.getByText("🫠A").click({
+    button: "right",
+  });
+  await window.locator("div").filter({ hasText: "Edit..." }).nth(3).click();
+  await expect(window.locator("body")).toContainText(
+    "The path you set is: File1.md",
+  );
+
+  await window.locator(".modal-close-button").click();
 });

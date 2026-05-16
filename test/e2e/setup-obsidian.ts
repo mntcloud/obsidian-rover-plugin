@@ -30,11 +30,11 @@ async function main() {
     const buffer = await res.arrayBuffer();
     writeFileSync(archivePath, Buffer.from(buffer));
 
-    console.log(`📦 Extracting to ${workDir}...`);
+    console.log(`Extracting to ${workDir}...`);
     execSync(`tar -xzf "${resolve(archivePath)}" -C "${resolve(workDir)}"`, {
       stdio: "inherit",
     });
-    console.log("✅ Extraction complete");
+    console.log("Extraction complete");
 
     const resourcesSrc = join(workDir, "obsidian-1.12.7", "resources");
     if (!existsSync(resourcesSrc)) {
@@ -48,7 +48,7 @@ async function main() {
       throw err;
     }
   } finally {
-    console.log("🧹 Cleaning up temp files...");
+    console.log("Cleaning up temp files...");
     rmSync(workDir, { recursive: true, force: true });
   }
 }
