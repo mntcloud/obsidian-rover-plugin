@@ -43,7 +43,7 @@ export class RecentsView implements m.ClassComponent {
                 <div
                   className="rover-file"
                   draggable={true}
-                  onclick={() => Explorer.openFile(path.full, true)}
+                  onclick={() => Explorer.openFile(path.full)}
                   ondragend={this.onDragEnd}
                   ondragstart={(ev: DragEvent) =>
                     this.onDragStart(ev, path.full)
