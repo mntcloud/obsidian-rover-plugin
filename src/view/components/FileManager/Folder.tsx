@@ -50,8 +50,6 @@ export class Folder implements m.ClassComponent<Attr> {
     if (ev.code == "Escape") {
       this.action = undefined;
     }
-
-    m.redraw();
   }
 
   oninit(vnode: m.Vnode<Attr, this>) {
@@ -88,7 +86,6 @@ export class Folder implements m.ClassComponent<Attr> {
 
       Explorer.getFiles(vnode.attrs.path).then((files) => {
         this.nested = files;
-        m.redraw();
       });
 
       this.capturedPath = vnode.attrs.path;
@@ -128,7 +125,6 @@ export class Folder implements m.ClassComponent<Attr> {
     }
 
     this.isDragEntered = false;
-    m.redraw();
   }
 
   handleContextMenu(ev: PointerEvent, path: string) {
@@ -327,7 +323,7 @@ export class Folder implements m.ClassComponent<Attr> {
         {this.nested.map((file) => {
           return file.isFolder ? (
             <Folder
-              key={file.mtime}
+              key={file.ctime}
               name={file.name}
               nest={vnode.attrs.nest + 1}
               path={file.path}

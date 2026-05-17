@@ -1,6 +1,7 @@
 import { App, Workspace, Vault } from "obsidian";
 
 export interface RoverFile {
+  ctime: number;
   mtime: number;
   name: string;
   path: string;

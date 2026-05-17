@@ -37,10 +37,6 @@ export class ExplorerBaseModel {
     } else {
       await onDOMUpdate(true);
     }
-
-    if (!this.isBeingTested) {
-      m.redraw();
-    }
   }
 
   async onRename(
@@ -73,10 +69,6 @@ export class ExplorerBaseModel {
           oldPath ? oldPath : undefined,
         );
       }
-
-      if (!this.isBeingTested) {
-        m.redraw();
-      }
     } else {
       const path = old.slice(0, old.length - 1).join("/");
 
@@ -89,10 +81,6 @@ export class ExplorerBaseModel {
           newPath ? false : true,
           newPath ? newPath : undefined,
         );
-
-        if (!this.isBeingTested) {
-          m.redraw();
-        }
       }
     }
   }
@@ -115,9 +103,13 @@ export class ExplorerBaseModel {
     } else if (!a.isFolder && b.isFolder) {
       return 1;
     } else {
-      return a.name
-        .toLocaleLowerCase()
-        .localeCompare(b.name.toLocaleLowerCase());
+      if (a.isFolder && b.isFolder) {
+        return a.name
+          .toLocaleLowerCase()
+          .localeCompare(b.name.toLocaleLowerCase());
+      } else {
+        return a.ctime > b.ctime ? -1 : 1;
+      }
     }
   }
 
@@ -220,7 +212,8 @@ export class ExplorerBaseModel {
       }
 
       files.push({
-        mtime: stat!.type != "file" ? stat!.ctime : stat!.mtime,
+        ctime: stat.ctime,
+        mtime: stat!.mtime,
         name: stat!.type != "folder" ? basename(item.name, ".md") : item.name,
         path: item.path,
         isFolder: stat!.type == "folder",

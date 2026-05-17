@@ -105,8 +105,6 @@ export class ExplorerView implements m.ClassComponent {
     if (ev.code == "Escape") {
       this.action = undefined;
     }
-
-    m.redraw();
   }
 
   onContextMenu(ev: PointerEvent) {
@@ -188,7 +186,7 @@ export class ExplorerView implements m.ClassComponent {
           ? this.root.map((file) => {
               return file.isFolder ? (
                 <Folder
-                  key={file.mtime}
+                  key={file.ctime}
                   name={file.name}
                   path={file.path}
                   nest={0}
