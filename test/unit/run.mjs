@@ -16,7 +16,7 @@ const OUT = ".test-out";
 mkdirSync(OUT, { recursive: true });
 
 const files = [];
-for await (const f of glob("./test/**/*.test.ts", {
+for await (const f of glob("./test/unit/**/*.test.ts", {
   exclude: (p) => p.includes("node_modules"),
 })) {
   files.push(f);
@@ -51,7 +51,7 @@ const ctx = await esbuild.context({
       name: "good-guy-qa",
       setup(build) {
         build.onResolve({ filter: /obsidian/ }, (args) => {
-          return { path: join(process.cwd(), "test/mocks/obsidian.ts") };
+          return { path: join(process.cwd(), "test/unit/mocks/obsidian.ts") };
         });
 
         build.onEnd((_) => {

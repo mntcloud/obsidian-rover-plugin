@@ -56,7 +56,7 @@ describe("Vault Listeners", () => {
       "folderA/subfolder2/subfolder3/file4.md",
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         log(`STAT: ${path}`);
 
@@ -91,7 +91,7 @@ describe("Vault Listeners", () => {
       `${oldBasePath}/subfolder1/file2.md`,
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         const now = Date.now();
         // Old paths (like oldBasePath and its children) should not exist
@@ -176,7 +176,7 @@ describe("Vault Listeners", () => {
       "folderA/folderB/subfolder1/file2.md",
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         const now = Date.now();
         const existingPathData: Record<
@@ -229,7 +229,7 @@ describe("Vault Listeners", () => {
       "folderA/subfolder1/file2.md",
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         if (path === "folderA") {
           return null;
@@ -268,7 +268,7 @@ describe("Vault Listeners", () => {
     // Moving file1.md from root to folderB/folderC
     renameMap.set("folderB/folderC/file1.md", "file1.md");
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         // The new file path "folderB/folderC/file1.md" will exist.
         if (path === "folderB/folderC/file1.md") {
@@ -323,7 +323,7 @@ describe("Vault Listeners", () => {
       `${oldBase}/subfolder1/file2.md`,
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         const now = Date.now();
         // Old paths should not exist
@@ -400,7 +400,7 @@ describe("Vault Listeners", () => {
       `${oldBase}/subfolder1/file2.md`,
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         const now = Date.now();
         // Old paths should not exist
@@ -466,7 +466,7 @@ describe("Vault Listeners", () => {
       `${oldBase}/childFolder/file2.md`,
     );
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         // Old paths should not exist
         if (path.startsWith("parentFolder/folderToMove")) {
@@ -532,7 +532,7 @@ describe("Vault Listeners", () => {
 
     renameMap.set("folder1/another.md", "folder1/file.md");
 
-    mockedObsidian?.vault.adapter.stat.mock.mockImplementation(
+    mockedObsidian?.app.vault.adapter.stat.mock.mockImplementation(
       async (path: string) => {
         // The old file path "folder1/file.md" should not exist.
         if (path === "folder1/file.md") {

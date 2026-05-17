@@ -1,6 +1,5 @@
 import { RoverBookmark } from "rover/core";
 import { test, expect } from "./obsidian-test";
-import { assert } from "node:test";
 
 const item = (
   id: number,
